@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+}
+
+model User {
+  id        String   @id // Clerk user ID
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  locale    String   @default("fr")
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Stripe
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+
+  // Subscription
+  plan Plan @default(FREE)
+
+  // Tokens
+  tokenBalance    Int @default(50)
+  tokensUsedTotal Int @default(0)
+  tokenResetAt    DateTime?
+
+  // Relations
+  restaurants Restaurant[]
+  aiUsages    AiUsage[]
+  tokenOrders TokenOrder[]
+
+  @@map("users")
+}
+
+model Restaurant {
+  id          String   @id @default(cuid())
+  name        String
+  cuisine     String?
+  description String?
+  address     String?
+  city        String?
+  country     String?
+  currency    String   @default("EUR")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  dishes    Dish[]
+  aiUsages  AiUsage[]
+
+  @@map("restaurants")
+}
+
+model Dish {
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  category     String?
+  price        Float
+  costPrice    Float?
+  margin       Float?
+  isActive     Boolean @default(true)
+  popularity   Int     @default(0) // 1-5 scale
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("dishes")
+}
+
+enum AiFeature {
+  MENU_ANALYSIS
+  DISH_DESCRIPTION
+  REVIEW_RESPONSE
+  SOCIAL_POST
+  TRANSLATE
+  MARGIN_ANALYSIS
+}
+
+model AiUsage {
+  id           String     @id @default(cuid())
+  feature      AiFeature
+  tokensUsed   Int
+  inputData    String?    @db.Text
+  outputData   String?    @db.Text
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurantId String?
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+
+  @@map("ai_usages")
+}
+
+model TokenOrder {
+  id                String   @id @default(cuid())
+  amount            Int
+  price             Float
+  stripePaymentId   String?  @unique
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+
+  @@map("token_orders")
+}
+
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("waitlist")
+}
