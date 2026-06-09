@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { getCurrentUser, getUserPlan } from "@/lib/auth";
-import { syncUser } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";
 import { PLANS, type PlanKey } from "@/lib/stripe";
 
@@ -10,15 +9,8 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let user = await getCurrentUser();
-
-  if (!user) {
-    try {
-      user = await syncUser();
-    } catch {
-      redirect("/sign-in");
-    }
-  }
+  const user = await getCurrentUser();
+  if (!user) redirect("/sign-in");
 
   const locale = await getLocale();
   const plan = getUserPlan(user);

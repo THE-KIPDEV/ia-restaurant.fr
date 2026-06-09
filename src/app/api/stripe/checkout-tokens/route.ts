@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, TOKEN_PACKS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { siteConfig } from "@/lib/config";
@@ -9,15 +9,17 @@ export async function POST(req: NextRequest) {
   try {
     const user = await requireUser();
 
-    const rl = rateLimit(`stripe:checkout:${user.id}`, 5, 60_000);
+    const rl = rateLimit(`stripe:tokens:${user.id}`, 5, 60_000);
     if (!rl.success) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const { priceId } = await req.json();
+    const { amount } = await req.json();
 
-    if (!priceId) {
-      return NextResponse.json({ error: "Price ID required" }, { status: 400 });
+    const pack = TOKEN_PACKS.find((p) => p.amount === amount);
+
+    if (!pack || !pack.stripePriceId) {
+      return NextResponse.json({ error: "Invalid token pack" }, { status: 400 });
     }
 
     const stripe = getStripe();
@@ -39,21 +41,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const metadata = {
+      userId: user.id,
+      site: "ia-restaurant.fr",
+      tokenAmount: String(amount),
+    };
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      mode: "subscription",
+      mode: "payment",
       payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${siteConfig.url}/dashboard/billing?success=true`,
-      cancel_url: `${siteConfig.url}/dashboard/billing?canceled=true`,
-      metadata: { userId: user.id, site: "ia-restaurant.fr" },
+      line_items: [{ price: pack.stripePriceId, quantity: 1 }],
+      success_url: `${siteConfig.url}/dashboard/tokens?success=true`,
+      cancel_url: `${siteConfig.url}/dashboard/tokens?canceled=true`,
+      metadata,
+      payment_intent_data: { metadata },
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     if (message === "Unauthorized") return NextResponse.json({ error: message }, { status: 401 });
-    console.error("checkout error:", message);
+    console.error("checkout-tokens error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

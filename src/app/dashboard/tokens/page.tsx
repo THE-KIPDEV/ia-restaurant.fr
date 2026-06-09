@@ -3,7 +3,8 @@ import { getUsageStats } from "@/lib/tokens";
 import { PLANS, TOKEN_PACKS, type PlanKey } from "@/lib/stripe";
 import { getLocale } from "@/lib/i18n";
 import { Coins, Zap, TrendingUp } from "lucide-react";
-import { formatPrice, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { TokenPacks } from "@/components/dashboard/token-packs";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Jetons" };
@@ -60,18 +61,10 @@ export default async function TokensPage() {
         <h2 className="mb-4 text-lg font-semibold text-text-primary">
           {locale === "fr" ? "Acheter des jetons supplémentaires" : "Buy Extra Tokens"}
         </h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {TOKEN_PACKS.map((pack, i) => (
-            <div key={i} className={`card p-5 text-center ${pack.popular ? "neon-border" : ""}`}>
-              {pack.popular && <span className="badge-neon mb-2 inline-flex">{locale === "fr" ? "Populaire" : "Popular"}</span>}
-              <p className="text-3xl font-extrabold text-text-primary">{pack.amount.toLocaleString()}</p>
-              <p className="text-sm text-text-muted">{locale === "fr" ? "jetons" : "tokens"}</p>
-              <p className="mt-2 text-2xl font-bold text-neon">{formatPrice(pack.price)}</p>
-              <p className="text-xs text-text-muted">{formatPrice(pack.price / pack.amount * 100)}/100 tokens</p>
-              <button className="btn-primary mt-4 w-full text-sm">{locale === "fr" ? "Acheter" : "Buy"}</button>
-            </div>
-          ))}
-        </div>
+        <TokenPacks
+          locale={locale}
+          packs={TOKEN_PACKS.map((p) => ({ amount: p.amount, price: p.price, popular: p.popular }))}
+        />
       </div>
 
       {/* Usage Stats */}

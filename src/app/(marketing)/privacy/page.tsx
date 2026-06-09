@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           <h2 className="mb-2 text-lg font-semibold text-text-primary">2. Données collectées</h2>
           <p>Nous collectons les données suivantes :</p>
           <ul className="ml-4 mt-2 list-disc space-y-1">
-            <li>Données d&apos;identification : nom, email (via Clerk)</li>
+            <li>Données d&apos;identification : nom, email (authentification gérée en interne, mots de passe chiffrés via bcrypt)</li>
             <li>Données de paiement : gérées par Stripe (nous ne stockons pas vos coordonnées bancaires)</li>
             <li>Données d&apos;utilisation : restaurants, plats, historique d&apos;utilisation IA</li>
             <li>Données techniques : cookies, adresse IP, type de navigateur</li>
@@ -61,7 +61,6 @@ export default function PrivacyPage() {
         <section>
           <h2 className="mb-2 text-lg font-semibold text-text-primary">8. Sous-traitants</h2>
           <ul className="ml-4 list-disc space-y-1">
-            <li>Clerk (authentification) — USA</li>
             <li>Stripe (paiements) — USA</li>
             <li>Anthropic (IA) — USA</li>
             <li>Railway (hébergement) — USA</li>

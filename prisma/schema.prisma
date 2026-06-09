@@ -19,7 +19,8 @@ enum Plan {
 }
 
 model User {
-  id        String   @id // Clerk user ID
+  id        String   @id @default(cuid())
+  password  String
   email     String   @unique
   name      String?
   imageUrl  String?

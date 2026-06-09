@@ -35,8 +35,12 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object;
+        if (session.metadata?.site !== "ia-restaurant.fr") break;
         const userId = session.metadata?.userId;
         if (!userId) break;
+
+        // Token pack one-time payments are credited via payment_intent.succeeded
+        if (session.mode !== "subscription") break;
 
         const subscription = await stripe.subscriptions.retrieve(
           session.subscription as string
@@ -65,7 +69,8 @@ export async function POST(req: NextRequest) {
             stripeSubscriptionId: subscription.id,
             stripePriceId: priceId,
             stripeCurrentPeriodEnd: new Date(
-              subscription.items.data[0]?.current_period_end ?? Date.now() / 1000 * 1000
+              ((subscription.items.data[0] as { current_period_end?: number })
+                ?.current_period_end ?? Date.now() / 1000) * 1000
             ),
             plan,
             tokenBalance: monthlyTokens,
@@ -85,7 +90,8 @@ export async function POST(req: NextRequest) {
           where: { stripeSubscriptionId: subscriptionId },
           data: {
             stripeCurrentPeriodEnd: new Date(
-              subscription.items.data[0]?.current_period_end ?? Date.now() / 1000 * 1000
+              ((subscription.items.data[0] as { current_period_end?: number })
+                ?.current_period_end ?? Date.now() / 1000) * 1000
             ),
           },
         });
@@ -115,7 +121,8 @@ export async function POST(req: NextRequest) {
             plan,
             stripePriceId: priceId,
             stripeCurrentPeriodEnd: new Date(
-              subscription.items.data[0]?.current_period_end ?? Date.now() / 1000 * 1000
+              ((subscription.items.data[0] as { current_period_end?: number })
+                ?.current_period_end ?? Date.now() / 1000) * 1000
             ),
           },
         });
@@ -140,6 +147,7 @@ export async function POST(req: NextRequest) {
       // Token pack one-time purchase
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object;
+        if (paymentIntent.metadata?.site !== "ia-restaurant.fr") break;
         const userId = paymentIntent.metadata?.userId;
         const tokenAmount = parseInt(paymentIntent.metadata?.tokenAmount || "0");
 

@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-
 export type Locale = "fr" | "en";
 
 const translations = {
@@ -207,6 +205,7 @@ const translations = {
 export type TranslationKey = keyof typeof translations;
 
 export async function getLocale(): Promise<Locale> {
+  const { cookies } = await import("next/headers");
   const cookieStore = await cookies();
   const locale = cookieStore.get("locale")?.value;
   return locale === "en" ? "en" : "fr";

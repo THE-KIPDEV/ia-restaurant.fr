@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useState, useEffect } from "react";
 import { Menu, X, ChefHat } from "lucide-react";
 
 interface HeaderProps {
@@ -11,7 +10,13 @@ interface HeaderProps {
 
 export function Header({ locale }: HeaderProps) {
   const [open, setOpen] = useState(false);
-  const { isSignedIn } = useAuth();
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => setIsSignedIn(res.ok))
+      .catch(() => setIsSignedIn(false));
+  }, []);
 
   const t = {
     features: locale === "fr" ? "Fonctionnalités" : "Features",

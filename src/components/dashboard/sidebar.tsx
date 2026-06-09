@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   BarChart3,
@@ -17,6 +16,7 @@ import {
   CreditCard,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -103,16 +103,16 @@ export function Sidebar({ locale, tokenBalance, tokenMax }: SidebarProps) {
             />
           </div>
         </div>
-        <UserButton
-          appearance={{
-            elements: {
-              rootBox: "w-full",
-              userButtonTrigger: "w-full justify-start",
-              userButtonBox: "flex-row-reverse",
-              avatarBox: "h-8 w-8",
-            },
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/deconnexion", { method: "POST" });
+            window.location.href = "/";
           }}
-        />
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-3 hover:text-text-primary"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {locale === "fr" ? "Déconnexion" : "Logout"}
+        </button>
       </div>
     </div>
   );

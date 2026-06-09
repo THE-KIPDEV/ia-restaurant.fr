@@ -1,14 +1,45 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { SignJWT, jwtVerify } from "jose";
+import { cookies } from "next/headers";
 import { prisma } from "./prisma";
+import { resetMonthlyTokens } from "./tokens";
 import type { Plan, User } from "@prisma/client";
 
-export async function getCurrentUser(): Promise<User | null> {
-  const clerkUser = await currentUser();
-  if (!clerkUser) return null;
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || "change-me-in-production-ia-restaurant"
+);
 
-  return prisma.user.findUnique({
-    where: { id: clerkUser.id },
-  });
+export async function createToken(userId: string): Promise<string> {
+  return new SignJWT({ userId })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("30d")
+    .sign(JWT_SECRET);
+}
+
+export async function verifyToken(
+  token: string
+): Promise<{ userId: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    return payload as { userId: string };
+  } catch {
+    return null;
+  }
+}
+
+export async function getSession(): Promise<{ userId: string } | null> {
+  const c = await cookies();
+  const token = c.get("token")?.value;
+  if (!token) return null;
+  return verifyToken(token);
+}
+
+export async function getCurrentUser(): Promise<User | null> {
+  const session = await getSession();
+  if (!session) return null;
+  // Lazy monthly token reset (fixes the "reset never triggered" bug)
+  await resetMonthlyTokens(session.userId).catch(() => {});
+  return prisma.user.findUnique({ where: { id: session.userId } });
 }
 
 export async function requireUser(): Promise<User> {
@@ -21,27 +52,6 @@ export async function requireAdmin(): Promise<User> {
   const user = await requireUser();
   if (user.role !== "ADMIN") throw new Error("Forbidden");
   return user;
-}
-
-export async function syncUser(): Promise<User> {
-  const clerkUser = await currentUser();
-  if (!clerkUser) throw new Error("Unauthorized");
-
-  return prisma.user.upsert({
-    where: { id: clerkUser.id },
-    update: {
-      email: clerkUser.emailAddresses[0]?.emailAddress ?? "",
-      name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || null,
-      imageUrl: clerkUser.imageUrl,
-    },
-    create: {
-      id: clerkUser.id,
-      email: clerkUser.emailAddresses[0]?.emailAddress ?? "",
-      name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || null,
-      imageUrl: clerkUser.imageUrl,
-      tokenBalance: 50,
-    },
-  });
 }
 
 export function getUserPlan(user: User): Plan {

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, BarChart3, ChefHat, MessageSquare, TrendingUp, Languages, Share2 } from "lucide-react";
+import { siteConfig } from "@/lib/config";
 
 const seoPages: Record<string, {
   title: string;
@@ -160,7 +161,7 @@ export async function generateMetadata({
   return {
     title: page.title,
     description: page.description,
-    alternates: { canonical: `https://ia-restaurant.fr/seo/${slug}` },
+    alternates: { canonical: `${siteConfig.url}/seo/${slug}` },
   };
 }
 
@@ -175,8 +176,53 @@ export default async function SeoPage({
 
   const icons = [BarChart3, ChefHat, MessageSquare, TrendingUp, Languages, Share2];
 
+  const pageUrl = `${siteConfig.url}/seo/${slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        headline: page.title,
+        description: page.description,
+        inLanguage: "fr",
+        url: pageUrl,
+        author: {
+          "@type": "Organization",
+          name: "IA Restaurant",
+          url: siteConfig.url,
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "IA Restaurant",
+          url: siteConfig.url,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Accueil",
+            item: siteConfig.url,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: page.h1,
+            item: pageUrl,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-32 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article>
         <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
           <span className="gradient-text">{page.h1}</span>

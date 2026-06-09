@@ -3,13 +3,21 @@ import Anthropic from "@anthropic-ai/sdk";
 let _client: Anthropic | null = null;
 
 function getClient(): Anthropic {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY not configured");
+  }
   if (!_client) {
-    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   }
   return _client;
 }
 
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "claude-haiku-4-5-20251001";
+
+const MAX_INPUT = 4000;
+function clamp(s: string | undefined | null): string {
+  return (s ?? "").toString().slice(0, MAX_INPUT);
+}
 
 export async function generateDishDescription(input: {
   name: string;
@@ -27,9 +35,9 @@ export async function generateDishDescription(input: {
         role: "user",
         content: `You are a world-class restaurant copywriter. Write a compelling menu description for this dish.
 
-Dish: ${input.name}
-Ingredients: ${input.ingredients}
-Cuisine type: ${input.cuisine}
+Dish: ${clamp(input.name)}
+Ingredients: ${clamp(input.ingredients)}
+Cuisine type: ${clamp(input.cuisine)}
 Tone: ${input.tone}
 Language: ${input.language === "fr" ? "French" : "English"}
 
@@ -53,9 +61,10 @@ export async function analyzeMenuEngineering(input: {
 }): Promise<string> {
   const client = getClient();
   const dishList = input.dishes
+    .slice(0, 100)
     .map(
       (d) =>
-        `- ${d.name}: price=${d.price}${input.currency}, cost=${d.costPrice}${input.currency}, popularity=${d.popularity}/5`
+        `- ${clamp(d.name)}: price=${d.price}${clamp(input.currency)}, cost=${d.costPrice}${clamp(input.currency)}, popularity=${d.popularity}/5`
     )
     .join("\n");
 
@@ -102,9 +111,9 @@ export async function generateReviewResponse(input: {
         role: "user",
         content: `You are a restaurant owner responding to a customer review. Write a personalized response.
 
-Restaurant: ${input.restaurantName}
+Restaurant: ${clamp(input.restaurantName)}
 Review rating: ${input.rating}/5
-Review text: "${input.review}"
+Review text: "${clamp(input.review)}"
 Tone: ${input.tone}
 Language: ${input.language === "fr" ? "French" : "English"}
 
@@ -133,9 +142,9 @@ export async function generateSocialPost(input: {
         content: `You are a social media manager for restaurants. Create an engaging post.
 
 Platform: ${input.platform}
-Restaurant: ${input.restaurantName}
-Cuisine: ${input.cuisine}
-Topic/occasion: ${input.topic}
+Restaurant: ${clamp(input.restaurantName)}
+Cuisine: ${clamp(input.cuisine)}
+Topic/occasion: ${clamp(input.topic)}
 Language: ${input.language === "fr" ? "French" : "English"}
 
 Write the post with appropriate hashtags for the platform. Make it engaging and on-brand. Include emoji suggestions in parentheses.`,
@@ -153,7 +162,8 @@ export async function translateMenu(input: {
 }): Promise<Array<{ name: string; description: string }>> {
   const client = getClient();
   const itemList = input.items
-    .map((i, idx) => `${idx + 1}. Name: ${i.name}\n   Description: ${i.description}`)
+    .slice(0, 100)
+    .map((i, idx) => `${idx + 1}. Name: ${clamp(i.name)}\n   Description: ${clamp(i.description)}`)
     .join("\n");
 
   const msg = await client.messages.create({
@@ -162,7 +172,7 @@ export async function translateMenu(input: {
     messages: [
       {
         role: "user",
-        content: `Translate these menu items from ${input.fromLanguage} to ${input.toLanguage}. Keep culinary terms authentic when appropriate.
+        content: `Translate these menu items from ${clamp(input.fromLanguage)} to ${clamp(input.toLanguage)}. Keep culinary terms authentic when appropriate.
 
 ${itemList}
 
@@ -187,9 +197,10 @@ export async function analyzeMargins(input: {
 }): Promise<string> {
   const client = getClient();
   const dishList = input.dishes
+    .slice(0, 100)
     .map(
       (d) =>
-        `- ${d.name} [${d.category}]: sell=${d.price}${input.currency}, cost=${d.costPrice}${input.currency}, margin=${(((d.price - d.costPrice) / d.price) * 100).toFixed(1)}%`
+        `- ${clamp(d.name)} [${clamp(d.category)}]: sell=${d.price}${clamp(input.currency)}, cost=${d.costPrice}${clamp(input.currency)}, margin=${(((d.price - d.costPrice) / d.price) * 100).toFixed(1)}%`
     )
     .join("\n");
 
