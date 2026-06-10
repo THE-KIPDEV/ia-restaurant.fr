@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  Sparkles,
   ArrowRight,
   BarChart3,
   MessageSquare,
@@ -24,7 +23,7 @@ export function Hero({ locale }: { locale: Locale }) {
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-neon/20 bg-neon-glow px-4 py-1.5">
-            <Sparkles className="h-4 w-4 text-neon" />
+            <ChefHat className="h-4 w-4 text-neon" />
             <span className="text-xs font-medium text-neon">
               {t("hero.badge")}
             </span>
@@ -53,10 +52,6 @@ export function Hero({ locale }: { locale: Locale }) {
               {t("hero.cta2")}
             </Link>
           </div>
-
-          <p className="mt-8 text-sm text-text-muted">
-            {t("hero.trustedBy")}
-          </p>
         </div>
 
         {/* Feature pills */}

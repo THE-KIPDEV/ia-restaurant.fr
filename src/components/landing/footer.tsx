@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { ChefHat } from "lucide-react";
+import { ChefHat, ArrowUpRight } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { createT } from "@/lib/i18n";
+import { getNetworkLinks } from "@/lib/network";
 
 export function Footer({ locale }: { locale: Locale }) {
   const t = createT(locale);
   const year = new Date().getFullYear();
+  const network = getNetworkLinks("ia-restaurant.fr", 6);
 
   return (
     <footer className="border-t border-border-dim bg-surface-1">
@@ -93,6 +95,35 @@ export function Footer({ locale }: { locale: Locale }) {
             </ul>
           </div>
         </div>
+
+        {network.length > 0 && (
+          <div className="mt-10 border-t border-border-dim pt-8">
+            <h4 className="mb-4 text-sm font-semibold text-text-primary">
+              {locale === "fr" ? "Nos autres outils" : "Our other tools"}
+            </h4>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {network.map((site) => (
+                <a
+                  key={site.domain}
+                  href={`https://${site.domain}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-start justify-between gap-2 rounded-xl border border-border-dim bg-surface-2 p-3 transition-colors hover:border-neon/40"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-text-secondary group-hover:text-neon transition-colors">
+                      {site.label}
+                    </span>
+                    <span className="block text-xs text-text-muted truncate">
+                      {site.desc}
+                    </span>
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-text-muted group-hover:text-neon transition-colors" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-10 border-t border-border-dim pt-6">
           <p className="text-center text-xs text-text-muted">
