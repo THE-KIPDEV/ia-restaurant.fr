@@ -5,6 +5,7 @@ import { Check, Zap } from "lucide-react";
 import Link from "next/link";
 import { PLANS, TOKEN_PACKS } from "@/lib/stripe";
 import { formatPrice } from "@/lib/utils";
+import { track } from "@/lib/kipstats";
 import type { Locale } from "@/lib/i18n";
 import { createT } from "@/lib/i18n";
 
@@ -107,6 +108,7 @@ export function Pricing({ locale }: { locale: Locale }) {
 
                 <Link
                   href={key === "free" ? "/sign-up" : "/sign-up"}
+                  onClick={() => track("cta_click", { cta: `pricing_${key}` })}
                   className={`mt-8 block w-full rounded-lg py-2.5 text-center text-sm font-semibold transition-all ${
                     popular
                       ? "btn-primary"

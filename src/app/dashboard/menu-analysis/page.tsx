@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BarChart3, Sparkles, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@/lib/kipstats";
 
 interface DishInput {
   name: string;
@@ -42,6 +43,7 @@ export default function MenuAnalysisPage() {
     }
     setLoading(true);
     setResult("");
+    track("tool_started", { tool: "menu_analysis" });
     try {
       const res = await fetch("/api/ai/menu-analysis", {
         method: "POST",
@@ -60,6 +62,7 @@ export default function MenuAnalysisPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult(data.analysis);
+      track("tool_completed", { tool: "menu_analysis" });
       toast.success(`Terminé ! -${data.tokensUsed} jetons`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");

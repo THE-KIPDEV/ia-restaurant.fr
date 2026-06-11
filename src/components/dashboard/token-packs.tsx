@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n";
+import { track, TOKEN_PACK_PRICE_CENTS } from "@/lib/kipstats";
 
 type Pack = {
   amount: number;
@@ -26,6 +27,10 @@ export function TokenPacks({ locale, packs }: { locale: Locale; packs: Pack[] })
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Checkout failed");
       }
+      track("checkout_started", {
+        plan: `tokens_${amount}`,
+        price: TOKEN_PACK_PRICE_CENTS[amount] ?? null,
+      });
       window.location.href = data.url;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur";

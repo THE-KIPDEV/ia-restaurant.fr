@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TrendingUp, Sparkles, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@/lib/kipstats";
 
 interface DishMargin {
   name: string;
@@ -42,6 +43,7 @@ export default function MarginAnalysisPage() {
     }
     setLoading(true);
     setResult("");
+    track("tool_started", { tool: "margin_analysis" });
     try {
       const res = await fetch("/api/ai/margin-analysis", {
         method: "POST",
@@ -60,6 +62,7 @@ export default function MarginAnalysisPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult(data.analysis);
+      track("tool_completed", { tool: "margin_analysis" });
       toast.success(`Terminé ! -${data.tokensUsed} jetons`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");

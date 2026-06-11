@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Languages, Sparkles, Plus, Trash2, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@/lib/kipstats";
 
 interface MenuItem {
   name: string;
@@ -39,6 +40,7 @@ export default function TranslatorPage() {
     }
     setLoading(true);
     setResults([]);
+    track("tool_started", { tool: "translate" });
     try {
       const res = await fetch("/api/ai/translate", {
         method: "POST",
@@ -52,6 +54,7 @@ export default function TranslatorPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResults(data.translations);
+      track("tool_completed", { tool: "translate" });
       toast.success(`Terminé ! -${data.tokensUsed} jetons`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Share2, Sparkles, Copy, Check, Instagram } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@/lib/kipstats";
 
 export default function SocialPostsPage() {
   const [platform, setPlatform] = useState<"instagram" | "facebook" | "tiktok">("instagram");
@@ -21,6 +22,7 @@ export default function SocialPostsPage() {
     }
     setLoading(true);
     setResult("");
+    track("tool_started", { tool: "social_post" });
     try {
       const res = await fetch("/api/ai/social-post", {
         method: "POST",
@@ -30,6 +32,7 @@ export default function SocialPostsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult(data.post);
+      track("tool_completed", { tool: "social_post" });
       toast.success(`Terminé ! -${data.tokensUsed} jetons`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");

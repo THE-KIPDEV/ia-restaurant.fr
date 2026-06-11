@@ -5,6 +5,7 @@ import { getLocale } from "@/lib/i18n";
 import { Coins, Zap, TrendingUp } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { TokenPacks } from "@/components/dashboard/token-packs";
+import PurchaseSignal from "@/components/PurchaseSignal";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Jetons" };
@@ -18,9 +19,14 @@ const featureLabels: Record<string, { fr: string; en: string }> = {
   MARGIN_ANALYSIS: { fr: "Analyse marges", en: "Margin Analysis" },
 };
 
-export default async function TokensPage() {
+export default async function TokensPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string }>;
+}) {
   const user = await requireUser();
   const locale = await getLocale();
+  const { success } = await searchParams;
   const plan = getUserPlan(user);
   const planKey = plan.toLowerCase() as PlanKey;
   const tokenMax = PLANS[planKey]?.tokens ?? 50;
@@ -29,6 +35,7 @@ export default async function TokensPage() {
 
   return (
     <div className="space-y-6">
+      {success === "true" && <PurchaseSignal plan="tokens" amount={null} />}
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Coins className="h-6 w-6 text-neon" />

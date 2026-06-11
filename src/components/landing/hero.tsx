@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { createT } from "@/lib/i18n";
+import CtaLink from "@/components/CtaLink";
 
 export function Hero({ locale }: { locale: Locale }) {
   const t = createT(locale);
@@ -38,13 +39,14 @@ export function Hero({ locale }: { locale: Locale }) {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
+            <CtaLink
+              cta="hero_signup"
               href="/sign-up"
               className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-base"
             >
               {t("hero.cta")}
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </CtaLink>
             <Link
               href="#features"
               className="btn-secondary inline-flex items-center gap-2 px-8 py-3 text-base"

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MessageSquare, Sparkles, Copy, Check, Star } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@/lib/kipstats";
 
 export default function ReviewResponderPage() {
   const [review, setReview] = useState("");
@@ -21,6 +22,7 @@ export default function ReviewResponderPage() {
     }
     setLoading(true);
     setResult("");
+    track("tool_started", { tool: "review_response" });
     try {
       const res = await fetch("/api/ai/review-response", {
         method: "POST",
@@ -30,6 +32,7 @@ export default function ReviewResponderPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult(data.response);
+      track("tool_completed", { tool: "review_response" });
       toast.success(`Terminé ! -${data.tokensUsed} jetons`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");

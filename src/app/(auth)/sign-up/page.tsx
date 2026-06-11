@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ChefHat } from "lucide-react";
+import { track } from "@/lib/kipstats";
 
 export default function SignUpPage() {
   const [name, setName] = useState("");
@@ -27,6 +28,7 @@ export default function SignUpPage() {
         setLoading(false);
         return;
       }
+      track("signup", {});
       window.location.href = "/dashboard";
     } catch {
       setError("Une erreur est survenue.");

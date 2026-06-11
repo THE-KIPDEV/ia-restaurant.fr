@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChefHat, Sparkles, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { track } from "@/lib/kipstats";
 
 export default function DishGeneratorPage() {
   const [name, setName] = useState("");
@@ -21,6 +22,7 @@ export default function DishGeneratorPage() {
     }
     setLoading(true);
     setResult("");
+    track("tool_started", { tool: "dish_description" });
     try {
       const res = await fetch("/api/ai/dish-description", {
         method: "POST",
@@ -30,6 +32,7 @@ export default function DishGeneratorPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult(data.description);
+      track("tool_completed", { tool: "dish_description" });
       toast.success(`Terminé ! -${data.tokensUsed} jetons`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");

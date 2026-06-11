@@ -3,17 +3,29 @@ import { PLANS } from "@/lib/stripe";
 import { getLocale } from "@/lib/i18n";
 import { CreditCard, Check, ExternalLink } from "lucide-react";
 import { formatPrice, formatDate } from "@/lib/utils";
+import { SubscribeButton } from "@/components/dashboard/subscribe-button";
+import PurchaseSignal from "@/components/PurchaseSignal";
+import { PLAN_PRICE_CENTS } from "@/lib/kipstats";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Facturation" };
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string }>;
+}) {
   const user = await requireUser();
   const locale = await getLocale();
   const plan = getUserPlan(user);
+  const { success } = await searchParams;
+  const purchasedPlan = plan.toLowerCase();
 
   return (
     <div className="space-y-6">
+      {success === "true" && purchasedPlan !== "free" && (
+        <PurchaseSignal plan={purchasedPlan} amount={PLAN_PRICE_CENTS[purchasedPlan] ?? null} />
+      )}
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <CreditCard className="h-6 w-6 text-neon" />
@@ -71,12 +83,11 @@ export default async function BillingPage() {
                   {locale === "fr" ? "Plan actuel" : "Current Plan"}
                 </div>
               ) : key !== "free" ? (
-                <form action="/api/stripe/checkout" method="POST">
-                  <input type="hidden" name="priceId" value={key === "pro" ? PLANS.pro.stripePriceMonthly : PLANS.business.stripePriceMonthly} />
-                  <button className="btn-primary mt-4 w-full text-sm">
-                    {locale === "fr" ? "Souscrire" : "Subscribe"}
-                  </button>
-                </form>
+                <SubscribeButton
+                  plan={key}
+                  priceId={key === "pro" ? PLANS.pro.stripePriceMonthly : PLANS.business.stripePriceMonthly}
+                  label={locale === "fr" ? "Souscrire" : "Subscribe"}
+                />
               ) : null}
             </div>
           );
