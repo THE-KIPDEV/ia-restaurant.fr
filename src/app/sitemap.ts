@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "gestion-restaurant-ia",
     "logiciel-restauration-ia",
     "rentabilite-restaurant-ia",
+    "formation-ia-restaurant",
   ].map((slug) => ({
     url: `${baseUrl}/seo/${slug}`,
     lastModified: new Date(),

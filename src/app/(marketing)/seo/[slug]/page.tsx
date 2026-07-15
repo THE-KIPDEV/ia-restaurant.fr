@@ -144,6 +144,18 @@ const seoPages: Record<string, {
     ],
     features: ["Analyse de rentabilité complète", "Recommandations chiffrées", "Impact financier estimé", "Menu engineering BCG", "Suivi dans le temps", "Plan d'action priorisé"],
   },
+  "formation-ia-restaurant": {
+    title: "Formation IA Restaurant — Apprenez à utiliser l'intelligence artificielle dans votre restaurant",
+    h1: "Formation IA restaurant : maîtrisez l'intelligence artificielle pas à pas",
+    description: "Guide pratique pour vous former à l'IA dans la restauration : par où commencer, quels outils utiliser et comment les intégrer à votre quotidien de restaurateur.",
+    content: [
+      "Se former à l'intelligence artificielle quand on gère un restaurant peut sembler intimidant. Bonne nouvelle : aucune compétence technique n'est nécessaire. Cette page vous explique comment démarrer progressivement, en partant de tâches concrètes que vous faites déjà chaque semaine — écrire des descriptions de plats, répondre aux avis, analyser vos marges.",
+      "La meilleure façon d'apprendre l'IA en restauration est de pratiquer sur vos propres données. Commencez par un seul outil : générez la description d'un de vos plats phares, ou faites analyser la marge d'une entrée. En quelques minutes, vous comprenez ce que l'IA sait faire, ses limites, et comment formuler une bonne demande. C'est cette pratique qui vous forme, bien plus qu'un cours théorique.",
+      "Une progression simple : semaine 1, les descriptions de plats et les réponses aux avis (des tâches courtes, à faible enjeu). Semaine 2, la traduction de votre carte et vos posts pour les réseaux sociaux. Semaine 3, les analyses plus stratégiques : menu engineering et étude des marges. À la fin du mois, l'IA fait partie de votre routine sans avoir suivi la moindre formation payante.",
+      "IA Restaurant est conçu pour cet apprentissage sur le terrain. Chaque outil s'utilise en langage naturel, en français, et le plan gratuit inclut 50 jetons par mois : de quoi tester chaque fonctionnalité et vous former sans engagement ni carte bancaire.",
+    ],
+    features: ["Prise en main sans compétence technique", "Apprentissage par la pratique", "Progression semaine par semaine", "6 outils IA pour s'exercer", "En français, en langage naturel", "50 jetons offerts pour tester"],
+  },
 };
 
 export async function generateStaticParams() {

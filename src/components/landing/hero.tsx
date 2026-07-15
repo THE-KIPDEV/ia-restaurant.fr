@@ -54,6 +54,12 @@ export function Hero({ locale }: { locale: Locale }) {
               {t("hero.cta2")}
             </Link>
           </div>
+
+          <p className="mt-4 text-sm text-text-secondary">
+            {locale === "fr"
+              ? "50 jetons offerts chaque mois — sans carte bancaire"
+              : "50 free tokens every month — no credit card required"}
+          </p>
         </div>
 
         {/* Feature pills */}
