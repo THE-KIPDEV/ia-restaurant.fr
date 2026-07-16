@@ -5,7 +5,10 @@ import { BarChart3, Sparkles, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { track } from "@/lib/kipstats";
 import { MenuToolbar } from "@/components/dashboard/menu-toolbar";
+import { BcgPreview } from "@/components/dashboard/bcg-preview";
 import { emptyDish, loadMenu, saveMenu, type StoredDish } from "@/lib/menu-storage";
+
+const CURRENCY_SYMBOLS: Record<string, string> = { EUR: "€", USD: "$", GBP: "£" };
 
 export default function MenuAnalysisPage() {
   const [dishes, setDishes] = useState<StoredDish[]>([emptyDish()]);
@@ -86,7 +89,8 @@ export default function MenuAnalysisPage() {
           <span className="gradient-text">Menu Engineering</span>
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Analysez votre carte avec la matrice BCG — Stars, Puzzles, Plowhorses, Dogs — 30 jetons
+          Le classement Étoile / Vache à lait / Énigme / Poids mort se calcule ici même, sans
+          jeton. Les 30 jetons servent au commentaire : quoi changer, dans quel ordre.
         </p>
       </div>
 
@@ -180,6 +184,12 @@ export default function MenuAnalysisPage() {
             </button>
           </div>
         </div>
+
+        {/* Classement déterministe, calculé pendant la saisie (aucun jeton). */}
+        <BcgPreview
+          dishes={dishes}
+          currencySymbol={CURRENCY_SYMBOLS[currency] ?? currency}
+        />
 
         {/* Result */}
         {result && (
