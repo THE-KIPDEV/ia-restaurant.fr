@@ -1,35 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TrendingUp, Sparkles, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { track } from "@/lib/kipstats";
+import { MenuToolbar } from "@/components/dashboard/menu-toolbar";
+import { emptyDish, loadMenu, saveMenu, type StoredDish } from "@/lib/menu-storage";
 
-interface DishMargin {
-  name: string;
-  price: string;
-  costPrice: string;
-  category: string;
-}
+const BASE_CATEGORIES = ["Entrées", "Plats", "Desserts", "Boissons", "Apéritifs", "Fromages"];
 
 export default function MarginAnalysisPage() {
-  const [dishes, setDishes] = useState<DishMargin[]>([
-    { name: "", price: "", costPrice: "", category: "Entrées" },
-  ]);
+  const [dishes, setDishes] = useState<StoredDish[]>([emptyDish("Entrées")]);
+  const [hydrated, setHydrated] = useState(false);
   const [currency, setCurrency] = useState("EUR");
   const [language, setLanguage] = useState<"fr" | "en">("fr");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Même carte que Menu Engineering : on la relit au montage.
+  useEffect(() => {
+    const stored = loadMenu();
+    if (stored.length > 0) setDishes(stored);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    saveMenu(dishes);
+  }, [dishes, hydrated]);
+
   function addDish() {
-    setDishes([...dishes, { name: "", price: "", costPrice: "", category: "Plats" }]);
+    setDishes([...dishes, emptyDish()]);
   }
 
   function removeDish(idx: number) {
     setDishes(dishes.filter((_, i) => i !== idx));
   }
 
-  function updateDish(idx: number, field: keyof DishMargin, value: string) {
+  function updateDish(idx: number, field: keyof StoredDish, value: string) {
     const updated = [...dishes];
     updated[idx] = { ...updated[idx], [field]: value };
     setDishes(updated);
@@ -71,7 +79,15 @@ export default function MarginAnalysisPage() {
     }
   }
 
-  const categories = ["Entrées", "Plats", "Desserts", "Boissons", "Apéritifs", "Fromages"];
+  // Une catégorie venue d'un CSV ("Pizzas", "Tapas"...) doit rester
+  // sélectionnable, sinon l'import la remplacerait en silence.
+  const categories = useMemo(() => {
+    const seen = new Set(BASE_CATEGORIES);
+    for (const d of dishes) {
+      if (d.category.trim()) seen.add(d.category);
+    }
+    return Array.from(seen);
+  }, [dishes]);
 
   return (
     <div className="space-y-6">
@@ -86,6 +102,14 @@ export default function MarginAnalysisPage() {
       </div>
 
       <div className="card p-6 space-y-4">
+        <MenuToolbar
+          dishes={dishes}
+          onImport={(imported) => setDishes(imported)}
+          onClear={() => setDishes([emptyDish("Entrées")])}
+          exportName="ma-carte"
+          hydrated={hydrated}
+        />
+
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-text-primary">Vos plats</h3>
           <div className="flex gap-2">

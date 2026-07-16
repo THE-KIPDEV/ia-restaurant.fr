@@ -1,35 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BarChart3, Sparkles, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { track } from "@/lib/kipstats";
-
-interface DishInput {
-  name: string;
-  price: string;
-  costPrice: string;
-  popularity: number;
-}
+import { MenuToolbar } from "@/components/dashboard/menu-toolbar";
+import { emptyDish, loadMenu, saveMenu, type StoredDish } from "@/lib/menu-storage";
 
 export default function MenuAnalysisPage() {
-  const [dishes, setDishes] = useState<DishInput[]>([
-    { name: "", price: "", costPrice: "", popularity: 3 },
-  ]);
+  const [dishes, setDishes] = useState<StoredDish[]>([emptyDish()]);
+  const [hydrated, setHydrated] = useState(false);
   const [currency, setCurrency] = useState("EUR");
   const [language, setLanguage] = useState<"fr" | "en">("fr");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // La carte vit dans le navigateur : on la relit au montage plutôt que de
+  // faire retaper 40 lignes à chaque session.
+  useEffect(() => {
+    const stored = loadMenu();
+    if (stored.length > 0) setDishes(stored);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    saveMenu(dishes);
+  }, [dishes, hydrated]);
+
   function addDish() {
-    setDishes([...dishes, { name: "", price: "", costPrice: "", popularity: 3 }]);
+    setDishes([...dishes, emptyDish()]);
   }
 
   function removeDish(idx: number) {
     setDishes(dishes.filter((_, i) => i !== idx));
   }
 
-  function updateDish(idx: number, field: keyof DishInput, value: string | number) {
+  function updateDish(idx: number, field: keyof StoredDish, value: string | number) {
     const updated = [...dishes];
     updated[idx] = { ...updated[idx], [field]: value };
     setDishes(updated);
@@ -86,6 +93,14 @@ export default function MenuAnalysisPage() {
       <div className="space-y-6">
         {/* Input */}
         <div className="card p-6 space-y-4">
+          <MenuToolbar
+            dishes={dishes}
+            onImport={(imported) => setDishes(imported)}
+            onClear={() => setDishes([emptyDish()])}
+            exportName="ma-carte"
+            hydrated={hydrated}
+          />
+
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-text-primary">Vos plats</h3>
             <div className="flex gap-2">
