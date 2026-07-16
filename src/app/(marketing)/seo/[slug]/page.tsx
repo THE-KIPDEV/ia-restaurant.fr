@@ -10,6 +10,8 @@ const seoPages: Record<string, {
   description: string;
   content: string[];
   features: string[];
+  // Liens éditoriaux sortants vers une page de fond du site (maillage interne).
+  related?: { href: string; label: string; desc: string }[];
 }> = {
   "ia-restaurant-paris": {
     title: "IA Restaurant Paris — Intelligence Artificielle pour Restaurants Parisiens",
@@ -32,6 +34,13 @@ const seoPages: Record<string, {
       "La gestion des avis clients est l'un des domaines où l'IA apporte le plus de valeur. Répondre à chaque avis Google, TripAdvisor ou TheFork prend un temps considérable. L'IA génère des réponses personnalisées, professionnelles et adaptées au ton de chaque situation en quelques secondes.",
     ],
     features: ["Analyse automatisée de carte", "Calcul de marges instantané", "Génération de descriptions", "Réponses aux avis personnalisées", "Traduction multilingue", "Content marketing IA"],
+    related: [
+      {
+        href: "/formation-ia-restaurant",
+        label: "Formation IA restaurant : faut-il payer 1 790 € ?",
+        desc: "Le comparatif des formations du marché, ce que l'OPCO rembourse vraiment, et un programme gratuit de 4 semaines.",
+      },
+    ],
   },
   "menu-engineering-ia": {
     title: "Menu Engineering IA — Optimisez votre carte avec l'intelligence artificielle",
@@ -44,6 +53,13 @@ const seoPages: Record<string, {
       "Les Plowhorses sont populaires mais peu rentables. L'IA calcule précisément la marge de chaque plat et suggère des ajustements : réduction des portions, substitution d'ingrédients coûteux, ou légère augmentation de prix. Les Dogs sont à la fois peu populaires et peu rentables : l'IA recommande leur retrait ou une refonte complète.",
     ],
     features: ["Matrice BCG automatisée", "Score de santé du menu (0-100)", "Recommandations concrètes", "Suggestions de repricing", "Analyse par catégorie", "Export des résultats"],
+    related: [
+      {
+        href: "/formation-ia-restaurant",
+        label: "Se former au menu engineering sans payer 1 790 €",
+        desc: "Le classement BCG de votre carte est l'exercice de la semaine 3 de notre programme gratuit.",
+      },
+    ],
   },
   "analyse-marge-restaurant": {
     title: "Analyse des Marges Restaurant — Calculateur IA de Rentabilité",
@@ -55,6 +71,13 @@ const seoPages: Record<string, {
       "L'IA estime également l'impact financier de chaque recommandation, vous permettant de prioriser les actions les plus rentables. Augmenter le prix d'un plat de 1€ ? Changer un ingrédient coûteux ? Réduire la portion d'un accompagnement ? L'IA calcule tout pour vous.",
     ],
     features: ["Calcul automatique des marges", "Analyse par catégorie", "Détection des marges dangereuses", "Recommandations chiffrées", "Impact financier estimé", "Comparaison avec les moyennes du secteur"],
+    related: [
+      {
+        href: "/formation-ia-restaurant",
+        label: "Calculer votre food cost : le prompt à copier",
+        desc: "Un prompt prêt à l'emploi pour chiffrer le coût matière et la marge brute d'un plat, pertes comprises.",
+      },
+    ],
   },
   "description-plat-ia": {
     title: "Générateur de Descriptions de Plats IA — Menu Copywriting",
@@ -77,6 +100,13 @@ const seoPages: Record<string, {
       "Trois tons sont disponibles : professionnel (neutre et efficace), chaleureux (personnalisé et engageant) et apologétique (pour les situations délicates). Chaque réponse est unique et fait référence aux détails spécifiques mentionnés dans l'avis.",
     ],
     features: ["Réponses en 2 secondes", "3 tons adaptables", "Personnalisation automatique", "Gestion avis positifs et négatifs", "Bilingue FR/EN", "5 jetons par réponse"],
+    related: [
+      {
+        href: "/formation-ia-restaurant",
+        label: "Les prompts pour répondre aux avis (1★ et 5★)",
+        desc: "Deux prompts à copier, plus ce qu'il ne faut jamais coller dans une IA côté RGPD.",
+      },
+    ],
   },
   "traduction-carte-restaurant": {
     title: "Traduction de Carte Restaurant IA — Multilingue Instantanée",
@@ -144,18 +174,9 @@ const seoPages: Record<string, {
     ],
     features: ["Analyse de rentabilité complète", "Recommandations chiffrées", "Impact financier estimé", "Menu engineering BCG", "Suivi dans le temps", "Plan d'action priorisé"],
   },
-  "formation-ia-restaurant": {
-    title: "Formation IA Restaurant — Apprenez à utiliser l'intelligence artificielle dans votre restaurant",
-    h1: "Formation IA restaurant : maîtrisez l'intelligence artificielle pas à pas",
-    description: "Guide pratique pour vous former à l'IA dans la restauration : par où commencer, quels outils utiliser et comment les intégrer à votre quotidien de restaurateur.",
-    content: [
-      "Se former à l'intelligence artificielle quand on gère un restaurant peut sembler intimidant. Bonne nouvelle : aucune compétence technique n'est nécessaire. Cette page vous explique comment démarrer progressivement, en partant de tâches concrètes que vous faites déjà chaque semaine — écrire des descriptions de plats, répondre aux avis, analyser vos marges.",
-      "La meilleure façon d'apprendre l'IA en restauration est de pratiquer sur vos propres données. Commencez par un seul outil : générez la description d'un de vos plats phares, ou faites analyser la marge d'une entrée. En quelques minutes, vous comprenez ce que l'IA sait faire, ses limites, et comment formuler une bonne demande. C'est cette pratique qui vous forme, bien plus qu'un cours théorique.",
-      "Une progression simple : semaine 1, les descriptions de plats et les réponses aux avis (des tâches courtes, à faible enjeu). Semaine 2, la traduction de votre carte et vos posts pour les réseaux sociaux. Semaine 3, les analyses plus stratégiques : menu engineering et étude des marges. À la fin du mois, l'IA fait partie de votre routine sans avoir suivi la moindre formation payante.",
-      "IA Restaurant est conçu pour cet apprentissage sur le terrain. Chaque outil s'utilise en langage naturel, en français, et le plan gratuit inclut 50 jetons par mois : de quoi tester chaque fonctionnalité et vous former sans engagement ni carte bancaire.",
-    ],
-    features: ["Prise en main sans compétence technique", "Apprentissage par la pratique", "Progression semaine par semaine", "6 outils IA pour s'exercer", "En français, en langage naturel", "50 jetons offerts pour tester"],
-  },
+  // NOTE : "formation-ia-restaurant" a été retiré de ce set et remplacé par la page dédiée
+  // /formation-ia-restaurant (comparatif + financement + programme). Un 301 est en place
+  // dans next.config.ts. Ne pas recréer ce slug ici : il cannibaliserait la nouvelle page.
 };
 
 export async function generateStaticParams() {
@@ -264,6 +285,20 @@ export default async function SeoPage({
             })}
           </div>
         </div>
+
+        {page.related && page.related.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-xl font-bold text-text-primary mb-4">À lire aussi</h2>
+            <div className="grid gap-3">
+              {page.related.map((r) => (
+                <Link key={r.href} href={r.href} className="card card-glow p-4 block">
+                  <span className="block text-sm font-medium text-text-primary">{r.label}</span>
+                  <span className="mt-1 block text-xs text-text-muted">{r.desc}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-12 card neon-border p-8 text-center">
           <h2 className="text-2xl font-bold text-text-primary">

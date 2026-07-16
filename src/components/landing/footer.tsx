@@ -45,6 +45,11 @@ export function Footer({ locale }: { locale: Locale }) {
                 </Link>
               </li>
               <li>
+                <Link href="/formation-ia-restaurant" className="text-sm text-text-muted hover:text-neon transition-colors">
+                  {locale === "fr" ? "Formation IA restaurant" : "AI restaurant training"}
+                </Link>
+              </li>
+              <li>
                 <Link href="/sign-up" className="text-sm text-text-muted hover:text-neon transition-colors">
                   {t("nav.signUp")}
                 </Link>
