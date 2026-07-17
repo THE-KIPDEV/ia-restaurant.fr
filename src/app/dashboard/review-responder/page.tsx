@@ -1,9 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MessageSquare, Sparkles, Copy, Check, Star } from "lucide-react";
 import { toast } from "sonner";
 import { track } from "@/lib/kipstats";
+import { ReviewMenuContext } from "@/components/dashboard/review-menu-context";
+import { loadMenu, type StoredDish } from "@/lib/menu-storage";
+import {
+  countWords,
+  findMentionedDishes,
+  suggestNextDish,
+  RESPONSE_WORD_RANGE,
+} from "@/lib/review-dish-match";
 
 export default function ReviewResponderPage() {
   const [review, setReview] = useState("");
@@ -14,6 +22,23 @@ export default function ReviewResponderPage() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [menu, setMenu] = useState<StoredDish[]>([]);
+
+  // La carte saisie dans Menu Engineering / Marges vit dans le navigateur.
+  // On la relit pour reconnaître les plats cités dans l'avis — lecture seule,
+  // cet outil ne la modifie jamais.
+  useEffect(() => {
+    setMenu(loadMenu());
+  }, []);
+
+  const mentions = useMemo(() => findMentionedDishes(review, menu), [review, menu]);
+  const suggestion = useMemo(
+    () => suggestNextDish(menu, mentions, rating),
+    [menu, mentions, rating]
+  );
+  const wordCount = countWords(result);
+  const inBand =
+    wordCount >= RESPONSE_WORD_RANGE.min && wordCount <= RESPONSE_WORD_RANGE.max;
 
   async function handleGenerate() {
     if (!review.trim()) {
@@ -47,6 +72,13 @@ export default function ReviewResponderPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  // La phrase est ajoutée en fin de réponse, jamais à la place de ce qui est
+  // écrit : le restaurateur garde la main sur son texte.
+  function handleInsert(sentence: string) {
+    setResult((current) => (current.trim() ? `${current.trimEnd()} ${sentence}` : sentence));
+    toast.success("Phrase ajoutée — relisez avant de publier");
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -55,7 +87,8 @@ export default function ReviewResponderPage() {
           <span className="gradient-text">Réponses aux avis</span>
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Répondez à chaque avis Google ou TripAdvisor — 5 jetons par réponse
+          Répondez à chaque avis Google ou TripAdvisor — 5 jetons par réponse. Les plats de
+          votre carte cités dans l&apos;avis sont reconnus gratuitement, pendant la saisie.
         </p>
       </div>
 
@@ -109,6 +142,15 @@ export default function ReviewResponderPage() {
               className="input-field min-h-[120px] resize-y"
             />
           </div>
+
+          <ReviewMenuContext
+            mentions={mentions}
+            suggestion={suggestion}
+            rating={rating}
+            menuSize={menu.length}
+            onInsert={handleInsert}
+            canInsert={result.trim().length > 0}
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -169,8 +211,28 @@ export default function ReviewResponderPage() {
             )}
           </div>
           {result ? (
-            <div className="rounded-lg bg-surface-3 p-4">
-              <p className="text-sm leading-relaxed text-text-secondary whitespace-pre-wrap">{result}</p>
+            <div className="space-y-2">
+              {/* Éditable : une réponse publiée telle quelle se repère, et Google
+                  valorise les réponses uniques. Le modèle fait le brouillon. */}
+              <textarea
+                value={result}
+                onChange={(e) => setResult(e.target.value)}
+                aria-label="Réponse générée, modifiable avant publication"
+                className="input-field min-h-[200px] resize-y leading-relaxed"
+              />
+              <div className="flex items-center justify-between text-xs">
+                <span className={inBand ? "text-success" : "text-warning"}>
+                  {wordCount} mot{wordCount > 1 ? "s" : ""}
+                  {inBand
+                    ? " — dans la cible"
+                    : wordCount < RESPONSE_WORD_RANGE.min
+                      ? " — court, ça se lit comme un copier-coller"
+                      : " — long, on entend la justification"}
+                </span>
+                <span className="text-text-muted">
+                  cible {RESPONSE_WORD_RANGE.min}-{RESPONSE_WORD_RANGE.max} mots
+                </span>
+              </div>
             </div>
           ) : (
             <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border-default">

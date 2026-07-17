@@ -16,7 +16,8 @@ interface BcgPreviewProps {
   currencySymbol: string;
 }
 
-const CLASS_STYLE: Record<BcgClass, { chip: string; dot: string }> = {
+/** Partagé avec la reconnaissance de plats des réponses aux avis. */
+export const CLASS_STYLE: Record<BcgClass, { chip: string; dot: string }> = {
   star: { chip: "bg-neon/10 text-neon border-neon/30", dot: "bg-neon" },
   plowhorse: {
     chip: "bg-warning/10 text-warning border-warning/30",
