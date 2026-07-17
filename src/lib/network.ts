@@ -6,7 +6,7 @@ export type NetworkSite = {
   domain: string;
   label: string;
   desc: string;
-  category: "ia" | "restaurant" | "documents" | "image-video" | "mariage" | "dev";
+  category: "ia" | "restaurant" | "documents" | "image-video" | "mariage" | "dev" | "conso";
   flagship?: boolean;
 };
 
@@ -59,6 +59,7 @@ export const NETWORK_SITES: NetworkSite[] = [
   { domain: "creer-qrcode.fr", label: "Créer un QR Code", desc: "QR codes dynamiques", category: "dev" },
   { domain: "signature-email-pro.com", label: "Signature Email Pro", desc: "Signatures email pro", category: "dev" },
   { domain: "convertir-fichier.fr", label: "Convertir un fichier", desc: "Conversion de fichiers", category: "dev" },
+  { domain: "lequel-choisir.com", label: "Lequel choisir", desc: "Comparatifs 'A ou B' calculés", category: "conso", flagship: true },
 ];
 
 /**
@@ -80,6 +81,13 @@ export function getNetworkLinks(currentDomain: string, limit = 6): NetworkSite[]
     seen.add(s.domain);
     out.push(s);
     if (out.length >= limit) break;
+  }
+  if (currentDomain !== "lequel-choisir.com") {
+    const promoted = NETWORK_SITES.find((s) => s.domain === "lequel-choisir.com");
+    if (promoted) {
+      const rest = out.filter((s) => s.domain !== "lequel-choisir.com");
+      return [promoted, ...rest].slice(0, limit);
+    }
   }
   return out;
 }
