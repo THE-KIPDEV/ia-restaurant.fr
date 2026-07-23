@@ -185,6 +185,49 @@ const CUISINE_EX: CuisineEx[] = [
   },
 ];
 
+type CopyTpl = { situation: string; when: string; template: string };
+
+// Réponses courtes prêtes à coller, avec crochets [à remplacer]. Cas volontairement DIFFÉRENTS de la
+// section avant/après : ceux que les guides oublient (note sans texte, habitué, prix, touriste).
+const COPY_TEMPLATES: CopyTpl[] = [
+  {
+    situation: "5 étoiles, aucun commentaire",
+    when: "La note seule, pas un mot. Le cas le plus fréquent, et celui que personne ne sait traiter.",
+    template:
+      "Merci pour ces cinq étoiles ! Un mot sur ce qui vous a plu la prochaine fois nous ferait plaisir — ça aide le prochain gourmand à se décider. À bientôt chez [nom du resto].",
+  },
+  {
+    situation: "Habitué qui revient",
+    when: "Vous reconnaissez le prénom ou l'avis dit « comme toujours », « on y retourne à chaque fois ».",
+    template:
+      "Toujours un plaisir de vous compter parmi les fidèles. Merci de revenir ET de le dire ici, c'est ce qui fait tourner une maison de quartier comme la nôtre à [quartier / ville]. Gardez une place pour [plat de saison], il arrive.",
+  },
+  {
+    situation: "3 étoiles sans un mot",
+    when: "Note moyenne, zéro texte. Vous ne savez pas ce qui a coincé.",
+    template:
+      "Trois étoiles sans un mot, on reste un peu sur notre faim. Si quelque chose n'allait pas — un plat, l'attente, l'accueil — écrivez-nous à [email] : on préfère corriger que deviner.",
+  },
+  {
+    situation: "Compliment sur le service, pas la cuisine",
+    when: "Le client encense l'accueil ou un serveur, sans parler des plats.",
+    template:
+      "[Prénom du serveur] va être ravi de lire ça, je lui montre au prochain service. Un bon accueil, c'est la moitié du repas. La prochaine fois, laissez-le vous conseiller un plat — il connaît la carte par cœur.",
+  },
+  {
+    situation: "« Un peu cher »",
+    when: "L'addition pique. À ne jamais laisser sans réponse : le prochain lecteur a le même réflexe.",
+    template:
+      "Je comprends la remarque sur l'addition. Nos [produit, ex. viandes] viennent de [origine] et ça se paie, mais on a aussi le menu du midi à [prix] pour découvrir la maison sans se ruiner. Au plaisir de vous l'expliquer autour d'un café.",
+  },
+  {
+    situation: "Avis d'un touriste, en anglais",
+    when: "Clientèle étrangère. Répondre dans sa langue ET en français sert les deux publics.",
+    template:
+      "Thank you so much, so glad you enjoyed [dish]! You're always welcome back at [name]. — Merci beaucoup, revenez quand vous voulez, la porte de [quartier / ville] vous est ouverte.",
+  },
+];
+
 type Faq = { q: string; a: string };
 
 const FAQ: Faq[] = [
@@ -293,6 +336,7 @@ const TOC: { id: string; label: string }[] = [
   { id: "typologie", label: "Les 3 types d'avis négatifs" },
   { id: "exemples", label: "Exemples avant / après par type d'avis" },
   { id: "cuisines", label: "Exemples par type de cuisine" },
+  { id: "prets", label: "Réponses prêtes à coller" },
   { id: "carte", label: "L'IA qui lit VOTRE carte" },
   { id: "temps", label: "Le temps que ça vous fait gagner" },
   { id: "seo", label: "Réponses et SEO local" },
@@ -620,6 +664,39 @@ export default function RepondreAvisGooglePage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* 5b. RÉPONSES PRÊTES À COLLER */}
+        <section id="prets" className="mt-16 scroll-mt-24">
+          <h2 className="text-2xl font-bold text-text-primary">
+            Réponses prêtes à coller pour les cas que les guides oublient
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-text-secondary">
+            La section précédente montre la méthode sur des cas classiques. Voici six situations plus
+            traîtres — une note sans texte, un habitué, une remarque sur les prix — avec un modèle
+            court à copier, coller et adapter. Les crochets sont à remplacer par vos vrais mots.
+            Petit réflexe SEO local : quand c&apos;est naturel, laissez le nom d&apos;un plat et votre
+            quartier dans le <code className="text-neon">[quartier / ville]</code> — c&apos;est ce
+            texte-là que lit le prochain client et, de plus en plus, l&apos;IA qui le conseille.
+          </p>
+          <div className="mt-6 space-y-4">
+            {COPY_TEMPLATES.map((t) => (
+              <div key={t.situation} className="card p-5">
+                <h3 className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="text-base font-semibold text-neon">{t.situation}</span>
+                  <span className="text-xs font-normal text-text-muted">{t.when}</span>
+                </h3>
+                <blockquote className="mt-3 rounded-lg border-l-2 border-l-neon bg-surface-3 p-4 text-sm leading-relaxed text-text-secondary">
+                  {t.template}
+                </blockquote>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-text-muted">
+            Un dernier mot : ne collez pas le même modèle sous quinze avis d&apos;affilée. Changez le
+            plat, le prénom, une tournure. Un lecteur repère un copier-coller en trois secondes — et
+            là, l&apos;effet se retourne contre vous.
+          </p>
         </section>
 
         {/* 6. L'IA QUI LIT VOTRE CARTE */}
