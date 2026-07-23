@@ -222,34 +222,49 @@ const FAQ: Faq[] = [
   },
 ];
 
-type Compare = { feature: string; others: string; us: string };
+type Compare = { feature: string; chatgpt: string; others: string; us: string };
 
 const COMPARE: Compare[] = [
   {
     feature: "Connexion à Google Business Profile",
+    chatgpt: "Non — vous recopiez la réponse à la main",
     others: "Oui, publication en 1 clic, traitement en masse",
     us: "Non — copier-coller manuel de l'avis. On l'assume : c'est la brique commoditisée.",
   },
   {
     feature: "Langues de génération",
+    chatgpt: "Très nombreuses langues",
     others: "Jusqu'à 118 langues, détection automatique",
     us: "9 langues. Suffisant pour une clientèle FR + touristes, pas pour une chaîne mondiale.",
   },
   {
     feature: "Lecture de VOTRE carte",
+    chatgpt: "Non — il faut lui recoller vos plats à chaque requête, et il n'en garde rien",
     others: "Non — le générateur ignore vos plats",
     us: "Oui. Le plat cité dans l'avis est reconnu dans votre navigateur, avec sa marge et son rang BCG.",
   },
   {
     feature: "Cross-sell piloté par la marge",
+    chatgpt: "Non — il ignore vos prix et vos coûts matière",
     others: "Non",
     us: "Sur un avis positif, la réponse peut orienter vers une Énigme (bonne marge, peu vendue).",
   },
   {
     feature: "L'avis devient un signal de gestion",
+    chatgpt: "Non — chaque conversation repart de zéro",
     others: "Analyse de sentiment générique",
     us: "Un avis négatif récurrent sur un plat faible marge remonte dans votre menu engineering.",
   },
+];
+
+// Estimation de temps, pas une étude : hypothèse assumée (~4,5 min à la main, ~1 min pour relire un
+// brouillon), affichée telle quelle pour que le lecteur puisse la refaire avec ses propres chiffres.
+type Roi = { volume: string; manual: string; assisted: string; saved: string };
+
+const ROI: Roi[] = [
+  { volume: "10 avis", manual: "~45 min", assisted: "~10 min", saved: "une demi-heure" },
+  { volume: "30 avis", manual: "~2 h 15", assisted: "~30 min", saved: "environ 1 h 45" },
+  { volume: "60 avis", manual: "~4 h 30", assisted: "~1 h", saved: "environ 3 h 30" },
 ];
 
 const SOURCES: { label: string; url: string }[] = [
@@ -279,6 +294,7 @@ const TOC: { id: string; label: string }[] = [
   { id: "exemples", label: "Exemples avant / après par type d'avis" },
   { id: "cuisines", label: "Exemples par type de cuisine" },
   { id: "carte", label: "L'IA qui lit VOTRE carte" },
+  { id: "temps", label: "Le temps que ça vous fait gagner" },
   { id: "seo", label: "Réponses et SEO local" },
   { id: "faq", label: "Questions fréquentes" },
 ];
@@ -650,13 +666,17 @@ export default function RepondreAvisGooglePage() {
           </div>
 
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-sm">
+            <table className="w-full min-w-[760px] border-collapse text-sm">
               <caption className="sr-only">
-                Comparaison honnête entre les générateurs d&apos;avis grand public et notre approche
+                Comparaison honnête entre ChatGPT générique, les générateurs d&apos;avis branchés
+                Google et notre approche
               </caption>
               <thead>
                 <tr className="border-b border-border-default text-left">
                   <th scope="col" className="py-3 pr-4 font-semibold text-text-primary"></th>
+                  <th scope="col" className="py-3 pr-4 font-semibold text-text-primary">
+                    ChatGPT générique
+                  </th>
                   <th scope="col" className="py-3 pr-4 font-semibold text-text-primary">
                     Générateurs GBP (Localo, BonjourAvis)
                   </th>
@@ -671,6 +691,7 @@ export default function RepondreAvisGooglePage() {
                     <th scope="row" className="py-4 pr-4 text-left font-medium text-text-primary">
                       {c.feature}
                     </th>
+                    <td className="py-4 pr-4 text-text-muted">{c.chatgpt}</td>
                     <td className="py-4 pr-4 text-text-muted">{c.others}</td>
                     <td className="py-4 text-text-secondary">{c.us}</td>
                   </tr>
@@ -686,7 +707,68 @@ export default function RepondreAvisGooglePage() {
           </p>
         </section>
 
-        {/* 7. SEO LOCAL */}
+        {/* 7. TEMPS / ROI */}
+        <section id="temps" className="mt-16 scroll-mt-24">
+          <h2 className="text-2xl font-bold text-text-primary">
+            Le temps que répondre aux avis vous coûte vraiment
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-text-secondary">
+            Parlons franchement du nerf de la guerre : le temps. Sur mes propres avis, une réponse
+            que j&apos;assume — le temps de lire, de ne pas répondre à chaud, de citer le bon plat —
+            me prend 4 à 5 minutes. Ce n&apos;est pas un chiffre d&apos;étude, c&apos;est ce que je
+            constate au comptoir un dimanche soir. Faites le calcul avec votre propre cadence : voici
+            le mien, pour une réponse soignée à la main contre un brouillon déjà ancré sur votre
+            carte, qu&apos;il ne reste qu&apos;à relire, corriger et signer.
+          </p>
+
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[640px] border-collapse text-sm">
+              <caption className="sr-only">
+                Estimation du temps mensuel passé à répondre aux avis selon le volume, à la main
+                contre un brouillon assisté
+              </caption>
+              <thead>
+                <tr className="border-b border-border-default text-left">
+                  <th scope="col" className="py-3 pr-4 font-semibold text-text-primary">
+                    Par mois
+                  </th>
+                  <th scope="col" className="py-3 pr-4 font-semibold text-text-primary">
+                    À la main (~4,5 min/avis)
+                  </th>
+                  <th scope="col" className="py-3 pr-4 font-semibold text-text-primary">
+                    Brouillon à relire (~1 min/avis)
+                  </th>
+                  <th scope="col" className="py-3 font-semibold text-text-primary">
+                    Ce que vous récupérez
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {ROI.map((r) => (
+                  <tr key={r.volume} className="border-b border-border-dim align-top">
+                    <th scope="row" className="py-4 pr-4 text-left font-medium text-text-primary">
+                      {r.volume}
+                    </th>
+                    <td className="py-4 pr-4 text-text-muted">{r.manual}</td>
+                    <td className="py-4 pr-4 text-text-secondary">{r.assisted}</td>
+                    <td className="py-4 font-medium text-neon">{r.saved}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-4 text-sm leading-relaxed text-text-muted">
+            À 60 avis par mois, on parle d&apos;un service de cuisine entier récupéré. Mais le gain
+            n&apos;est pas que du temps : le brouillon ne repart jamais d&apos;une page blanche, il
+            connaît déjà le plat cité. C&apos;est la différence entre expédier quinze « merci pour
+            votre retour » et signer quinze réponses qui donnent envie de réserver. Un mot
+            d&apos;honnêteté : ce tableau est une estimation, pas un résultat mesuré chez vous —
+            remplacez mes 4,5 minutes par les vôtres, le rapport tient quand même.
+          </p>
+        </section>
+
+        {/* 8. SEO LOCAL */}
         <section id="seo" className="mt-16 scroll-mt-24">
           <h2 className="text-2xl font-bold text-text-primary">
             Vos réponses et le référencement local
@@ -725,7 +807,7 @@ export default function RepondreAvisGooglePage() {
           </div>
         </section>
 
-        {/* 8. FAQ */}
+        {/* 9. FAQ */}
         <section id="faq" className="mt-16 scroll-mt-24">
           <h2 className="text-2xl font-bold text-text-primary">Questions fréquentes</h2>
           <dl className="mt-6 space-y-6">
