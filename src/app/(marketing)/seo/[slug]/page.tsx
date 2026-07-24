@@ -73,6 +73,11 @@ const seoPages: Record<string, {
     features: ["Calcul automatique des marges", "Analyse par catégorie", "Détection des marges dangereuses", "Recommandations chiffrées", "Impact financier estimé", "Comparaison avec les moyennes du secteur"],
     related: [
       {
+        href: "/seo/comment-fixer-prix-plat-restaurant",
+        label: "Comment fixer le prix d'un plat",
+        desc: "Du coût matière au prix affiché : coefficient multiplicateur, prix psychologique, ancrage et menu engineering.",
+      },
+      {
         href: "/formation-ia-restaurant",
         label: "Calculer votre food cost : le prompt à copier",
         desc: "Un prompt prêt à l'emploi pour chiffrer le coût matière et la marge brute d'un plat, pertes comprises.",
@@ -118,6 +123,13 @@ const seoPages: Record<string, {
       "9 langues sont disponibles : français, anglais, espagnol, allemand, italien, portugais, chinois, japonais et arabe. Traduisez plusieurs plats en une seule fois pour un coût de seulement 10 jetons par traduction.",
     ],
     features: ["9 langues disponibles", "Préservation des termes culinaires", "Traduction en lot", "Descriptions et noms", "Copier-coller facile", "10 jetons par traduction"],
+    related: [
+      {
+        href: "/seo/traduire-carte-restaurant-anglais",
+        label: "Traduire sa carte en anglais : le lexique et les faux-amis",
+        desc: "45 termes culinaires FR→EN, les ratés de Google Translate (ris de veau, onglet) et le modèle de carte bilingue.",
+      },
+    ],
   },
   "optimiser-carte-restaurant": {
     title: "Optimiser sa Carte de Restaurant — Guide IA 2026",
@@ -140,6 +152,13 @@ const seoPages: Record<string, {
       "Indiquez simplement le sujet ou l'occasion (nouveau plat, événement, promotion, saison) et l'IA génère un post prêt à publier avec les hashtags appropriés et les suggestions d'emojis. 5 jetons par post, soit 400 posts avec le plan Pro.",
     ],
     features: ["3 plateformes", "Hashtags automatiques", "Emojis suggérés", "Adapté à votre cuisine", "Bilingue FR/EN", "5 jetons par post"],
+    related: [
+      {
+        href: "/seo/idee-post-instagram-restaurant",
+        label: "30 idées de posts Instagram + calendrier de 4 semaines",
+        desc: "Quoi poster : 30 idées classées, un calendrier prêt à l'emploi, les meilleurs horaires et des exemples de légendes.",
+      },
+    ],
   },
   "gestion-restaurant-ia": {
     title: "Gestion de Restaurant par IA — Plateforme SaaS Complète",
