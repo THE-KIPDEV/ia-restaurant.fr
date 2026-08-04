@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart3, Sparkles, Plus, Trash2 } from "lucide-react";
+import { BarChart3, Sparkles, Plus, Trash2, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { track } from "@/lib/kipstats";
 import { MenuToolbar } from "@/components/dashboard/menu-toolbar";
 import { BcgPreview } from "@/components/dashboard/bcg-preview";
 import { emptyDish, loadMenu, saveMenu, type StoredDish } from "@/lib/menu-storage";
+import { printMenuReport } from "@/lib/menu-report";
 
 const CURRENCY_SYMBOLS: Record<string, string> = { EUR: "€", USD: "$", GBP: "£" };
 
@@ -17,6 +18,21 @@ export default function MenuAnalysisPage() {
   const [language, setLanguage] = useState<"fr" | "en">("fr");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [restaurantName, setRestaurantName] = useState("");
+
+  function handleExport() {
+    const ok = printMenuReport({
+      dishes,
+      analysisMarkdown: result,
+      currencySymbol: CURRENCY_SYMBOLS[currency] ?? currency,
+      restaurantName,
+    });
+    if (ok) {
+      track("deliverable_exported", { tool: "menu_analysis", format: "pdf" });
+    } else {
+      toast.error("Rapport indisponible : ajoutez au moins 2 plats complets.");
+    }
+  }
 
   // La carte vit dans le navigateur : on la relit au montage plutôt que de
   // faire retaper 40 lignes à chaque session.
@@ -194,7 +210,30 @@ export default function MenuAnalysisPage() {
         {/* Result */}
         {result && (
           <div className="card p-6">
-            <h3 className="mb-4 text-sm font-semibold text-text-primary">Résultat de l&apos;analyse</h3>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-text-primary">Résultat de l&apos;analyse</h3>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={restaurantName}
+                  onChange={(e) => setRestaurantName(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  placeholder="Nom du restaurant"
+                  aria-label="Nom du restaurant pour le rapport"
+                  className="input-field w-auto text-sm"
+                />
+                <button
+                  onClick={handleExport}
+                  className="btn-primary flex items-center gap-2 whitespace-nowrap text-sm"
+                >
+                  <FileDown className="h-4 w-4" /> Rapport PDF
+                </button>
+              </div>
+            </div>
+            <p className="mb-4 text-xs text-text-muted">
+              Un document net et imprimable : matrice, tableau de classement et recommandations,
+              à poser sur la table de votre équipe ou à transmettre à votre chef.
+            </p>
             <div
               className="prose-dark text-sm leading-relaxed"
               dangerouslySetInnerHTML={{
