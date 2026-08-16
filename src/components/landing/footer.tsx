@@ -104,7 +104,7 @@ export function Footer({ locale }: { locale: Locale }) {
         {network.length > 0 && (
           <div className="mt-10 border-t border-border-dim pt-8">
             <h4 className="mb-4 text-sm font-semibold text-text-primary">
-              {locale === "fr" ? "Nos autres outils" : "Our other tools"}
+              {locale === "fr" ? "Nos autres sites restauration" : "Our other restaurant sites"}
             </h4>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {network.map((site) => (
