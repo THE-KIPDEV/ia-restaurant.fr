@@ -54,12 +54,12 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       payment_method_types: ["card"],
       line_items: [{ price: pack.stripePriceId, quantity: 1 }],
-      // kip-pay:route : `success_url` et `cancel_url` sont les SEULS paramètres que
-      // Stripe refuse avec `ui_mode`. Le retour passe par `return_url`, dérivé de
+      // kip-pay:route : `ui_mode: custom` refuse `success_url`, `cancel_url` ET
+      // `after_expiration` (vérifié contre l'API le 05/09/2026). Le retour passe par `return_url`, dérivé de
       // `success_url` pour ne rien changer à la page d'arrivée.
       ...(kipIntegre
         ? { ui_mode: "custom" as const, return_url: `${siteConfig.url}/dashboard/tokens?success=true` }
-        : { success_url: `${siteConfig.url}/dashboard/tokens?success=true`, cancel_url: `${siteConfig.url}/dashboard/tokens?canceled=true` }),
+        : { after_expiration: { recovery: { enabled: true } }, success_url: `${siteConfig.url}/dashboard/tokens?success=true`, cancel_url: `${siteConfig.url}/dashboard/tokens?canceled=true` }),
       metadata,
       payment_intent_data: { metadata },
     }, {

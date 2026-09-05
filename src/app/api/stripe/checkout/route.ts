@@ -46,12 +46,12 @@ export async function POST(req: NextRequest) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      // kip-pay:route : `success_url` et `cancel_url` sont les SEULS paramètres que
-      // Stripe refuse avec `ui_mode`. Le retour passe par `return_url`, dérivé de
+      // kip-pay:route : `ui_mode: custom` refuse `success_url`, `cancel_url` ET
+      // `after_expiration` (vérifié contre l'API le 05/09/2026). Le retour passe par `return_url`, dérivé de
       // `success_url` pour ne rien changer à la page d'arrivée.
       ...(kipIntegre
         ? { ui_mode: "custom" as const, return_url: `${siteConfig.url}/dashboard/billing?success=true` }
-        : { success_url: `${siteConfig.url}/dashboard/billing?success=true`, cancel_url: `${siteConfig.url}/dashboard/billing?canceled=true` }),
+        : { after_expiration: { recovery: { enabled: true } }, success_url: `${siteConfig.url}/dashboard/billing?success=true`, cancel_url: `${siteConfig.url}/dashboard/billing?canceled=true` }),
       metadata: { userId: user.id, site: "ia-restaurant.fr" },
     }, {
       // 🚨 Cette requête SEULE part en 2025-03-31.basil : la version

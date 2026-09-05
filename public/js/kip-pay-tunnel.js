@@ -199,8 +199,12 @@
       if (!session) {
         session = poster(o.endpoint, corps,
                          Object.assign({}, o.entetes, ENTETE_INTEGRE)).then(function (res) {
-          if (!res || !res.clientSecret) throw new Error((res && res.error) || "session refusée");
-          return res;
+          // 🚨 Toutes les routes ne répondent pas à plat : certaines enveloppent
+          // leur charge utile dans `data`. Chercher au premier niveau seulement
+          // faisait échouer le montage sur une session parfaitement valide.
+          var utile = (res && res.clientSecret) ? res : (res && res.data) || {};
+          if (!utile.clientSecret) throw new Error((res && res.error) || "session refusée");
+          return utile;
         });
         session.catch(function () {});
       }
