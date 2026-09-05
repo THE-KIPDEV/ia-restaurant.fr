@@ -58,7 +58,12 @@ export async function POST(req: NextRequest) {
       // `after_expiration` (vérifié contre l'API le 05/09/2026). Le retour passe par `return_url`, dérivé de
       // `success_url` pour ne rien changer à la page d'arrivée.
       ...(kipIntegre
-        ? { ui_mode: "custom" as const, return_url: `${siteConfig.url}/dashboard/tokens?success=true` }
+        // 🚨 Les types de ce SDK (v17 et moins) ignorent `ui_mode: "custom"`,
+        // ajouté en v18. L'API l'accepte pourtant, avec la version épinglée à la
+        // requête juste en dessous — le cast le dit à TypeScript sans rien changer
+        // à ce qui part sur le réseau.
+        ? ({ ui_mode: "custom", return_url: `${siteConfig.url}/dashboard/tokens?success=true` } as unknown as
+           { success_url: string; cancel_url: string })
         : { after_expiration: { recovery: { enabled: true } }, success_url: `${siteConfig.url}/dashboard/tokens?success=true`, cancel_url: `${siteConfig.url}/dashboard/tokens?canceled=true` }),
       metadata,
       payment_intent_data: { metadata },
