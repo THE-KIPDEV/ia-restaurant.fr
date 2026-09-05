@@ -59,6 +59,79 @@ const TEXTES = {
   rassurance: "Paiement sécurisé par Stripe. Votre carte n'est jamais vue par ce site.",
 };
 
+
+/**
+ * Les libellés dessinés par le module, par langue.
+ *
+ * 🚨 Ceux de Stripe s'adaptent seuls à la langue du visiteur ; les nôtres, non.
+ * Vu à l'écran sur tabela-alergenow.pl : « PAYER EN UN CLIC » et « Moyen de
+ * paiement » en français au milieu d'une page polonaise. Le parc compte six sites
+ * non francophones par domaine, plus les `.com` anglophones.
+ *
+ * La langue vient de `<html lang>` — le site la déclare déjà, on ne la redemande
+ * pas. `textes` reste prioritaire pour un site qui veut sa propre formulation.
+ */
+const LANGUES = {
+  en: {
+    payer: "Pay", patienter: "One moment…", encours: "Processing…",
+    recap: "Your order", sousTotal: "Subtotal", remise: "Discount", taxe: "Tax",
+    total: "Total", parMois: "per month", parAn: "per year",
+    codePromo: "I have a promo code", codePromoChamp: "Promo code",
+    appliquer: "Apply", retirer: "Remove",
+    codeRefuse: "This code is not valid for this order.",
+    unClic: "Pay in one click", ou: "or pay by card",
+    coordonnees: "Your details", paiement: "Payment method",
+    erreurCharge: "The payment form could not load. Reload the page; if it happens again, write to us.",
+    erreurSession: "The payment could not be prepared. Reload the page; if it happens again, write to us.",
+    rassurance: "Payment secured by Stripe. This site never sees your card.",
+  },
+  pl: {
+    payer: "Zapłać", patienter: "Chwileczkę…", encours: "Przetwarzanie…",
+    recap: "Twoje zamówienie", sousTotal: "Suma częściowa", remise: "Rabat", taxe: "VAT",
+    total: "Razem", parMois: "miesięcznie", parAn: "rocznie",
+    codePromo: "Mam kod rabatowy", codePromoChamp: "Kod rabatowy",
+    appliquer: "Zastosuj", retirer: "Usuń",
+    codeRefuse: "Ten kod nie jest ważny dla tego zamówienia.",
+    unClic: "Zapłać jednym kliknięciem", ou: "lub zapłać kartą",
+    coordonnees: "Twoje dane", paiement: "Metoda płatności",
+    erreurCharge: "Formularz płatności nie mógł się załadować. Odśwież stronę; jeśli to się powtórzy, napisz do nas.",
+    erreurSession: "Nie udało się przygotować płatności. Odśwież stronę; jeśli to się powtórzy, napisz do nas.",
+    rassurance: "Płatność zabezpieczona przez Stripe. Ta strona nigdy nie widzi Twojej karty.",
+  },
+  it: {
+    payer: "Paga", patienter: "Un momento…", encours: "Pagamento in corso…",
+    recap: "Il tuo ordine", sousTotal: "Subtotale", remise: "Sconto", taxe: "IVA",
+    total: "Totale", parMois: "al mese", parAn: "all'anno",
+    codePromo: "Ho un codice sconto", codePromoChamp: "Codice sconto",
+    appliquer: "Applica", retirer: "Rimuovi",
+    codeRefuse: "Questo codice non è valido per questo ordine.",
+    unClic: "Paga con un clic", ou: "oppure paga con carta",
+    coordonnees: "I tuoi dati", paiement: "Metodo di pagamento",
+    erreurCharge: "Il modulo di pagamento non si è caricato. Ricarica la pagina; se succede ancora, scrivici.",
+    erreurSession: "Impossibile preparare il pagamento. Ricarica la pagina; se succede ancora, scrivici.",
+    rassurance: "Pagamento protetto da Stripe. Questo sito non vede mai la tua carta.",
+  },
+  es: {
+    payer: "Pagar", patienter: "Un momento…", encours: "Procesando…",
+    recap: "Tu pedido", sousTotal: "Subtotal", remise: "Descuento", taxe: "IVA",
+    total: "Total", parMois: "al mes", parAn: "al año",
+    codePromo: "Tengo un código promocional", codePromoChamp: "Código promocional",
+    appliquer: "Aplicar", retirer: "Quitar",
+    codeRefuse: "Este código no es válido para este pedido.",
+    unClic: "Pagar con un clic", ou: "o pagar con tarjeta",
+    coordonnees: "Tus datos", paiement: "Método de pago",
+    erreurCharge: "El formulario de pago no se ha podido cargar. Recarga la página; si vuelve a ocurrir, escríbenos.",
+    erreurSession: "No se ha podido preparar el pago. Recarga la página; si vuelve a ocurrir, escríbenos.",
+    rassurance: "Pago protegido por Stripe. Este sitio nunca ve tu tarjeta.",
+  },
+};
+
+function languePage(o) {
+  if (o.langue) return o.langue;
+  const l = (document.documentElement.getAttribute("lang") || "").slice(0, 2).toLowerCase();
+  return LANGUES[l] ? l : "fr";
+}
+
 const INTERVALLES = { month: "par mois", year: "par an", week: "par semaine", day: "par jour" };
 
 /**
@@ -77,7 +150,7 @@ const INTERVALLES = { month: "par mois", year: "par an", week: "par semaine", da
  * @returns {Promise<{destroy:()=>void}>}
  */
 export async function mountKipPay(container, o) {
-  const t = { ...TEXTES, ...(o.textes || {}) };
+  const t = { ...TEXTES, ...(LANGUES[languePage(o)] || {}), ...(o.textes || {}) };
 
 
   /**
