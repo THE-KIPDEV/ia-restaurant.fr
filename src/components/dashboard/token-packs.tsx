@@ -18,6 +18,18 @@ export function TokenPacks({ locale, packs }: { locale: Locale; packs: Pack[] })
   async function handleBuy(amount: number) {
     setLoadingAmount(amount);
     try {
+      // kip-pay:bouton — le paiement se fait dans la page, à la marque du site.
+      // La page hébergée de Stripe reste le repli : le tunnel y bascule seul.
+      const kipTunnel = (globalThis as { KipPayTunnel?: { ouvrir: (o: Record<string, unknown>) => void } }).KipPayTunnel;
+      if (kipTunnel) {
+        kipTunnel.ouvrir({
+          endpoint: "/api/stripe/checkout-tokens",
+          payload: { amount },
+          logoUrl: "/favicon.svg",
+          siteName: "Ia Restaurant",
+        });
+        return;
+      }
       const res = await fetch("/api/stripe/checkout-tokens", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

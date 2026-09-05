@@ -6,6 +6,8 @@ import { rateLimit } from "@/lib/rate-limit";
 import { siteConfig } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
+  // kip-pay:route : le tunnel intégré s'annonce par un en-tête.
+  const kipIntegre = req.headers.get("x-kip-pay") === "inline";
   try {
     const user = await requireUser();
 
@@ -44,12 +46,28 @@ export async function POST(req: NextRequest) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${siteConfig.url}/dashboard/billing?success=true`,
-      cancel_url: `${siteConfig.url}/dashboard/billing?canceled=true`,
+      // kip-pay:route : `success_url` et `cancel_url` sont les SEULS paramètres que
+      // Stripe refuse avec `ui_mode`. Le retour passe par `return_url`, dérivé de
+      // `success_url` pour ne rien changer à la page d'arrivée.
+      ...(kipIntegre
+        ? { ui_mode: "custom" as const, return_url: `${siteConfig.url}/dashboard/billing?success=true` }
+        : { success_url: `${siteConfig.url}/dashboard/billing?success=true`, cancel_url: `${siteConfig.url}/dashboard/billing?canceled=true` }),
       metadata: { userId: user.id, site: "ia-restaurant.fr" },
+    }, {
+      // 🚨 Cette requête SEULE part en 2025-03-31.basil : la version
+      // épinglée du site est plus ancienne et refuserait `ui_mode`.
+      // Monter le SDK la changerait pour les webhooks aussi.
+      ...(kipIntegre ? { apiVersion: "2025-03-31.basil" as const } : {}),
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json(
+    kipIntegre
+      // 🚨 La clé publique repart avec la session : sous Next elle devrait
+      // sinon être `NEXT_PUBLIC_` et fournie AU BUILD. Bonus : clé et session
+      // viennent forcément du même compte.
+      ? { clientSecret: session.client_secret, publishableKey: process.env.STRIPE_PUBLIC_KEY }
+      : { url: session.url },
+  );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     if (message === "Unauthorized") return NextResponse.json({ error: message }, { status: 401 });

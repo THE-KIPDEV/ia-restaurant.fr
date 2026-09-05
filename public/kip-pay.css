@@ -1,0 +1,204 @@
+/*
+ * kip-pay — habillage du tunnel intégré.
+ *
+ * Chaque site retheme en redéfinissant les variables ; les valeurs par défaut sont
+ * neutres et lisibles partout. Les champs de carte sont rendus par Stripe dans une
+ * iframe et ne s'atteignent PAS d'ici : ils se règlent par l'Appearance API, passée
+ * au module via `options.appearance`.
+ */
+.kip-pay {
+  --kip-encre: #16202e;
+  --kip-encre-douce: #5b6675;
+  --kip-filet: #e2e6ec;
+  --kip-fond: #ffffff;
+  --kip-fond-recap: #f6f7f9;
+  --kip-action: #14532d;
+  --kip-action-encre: #ffffff;
+  --kip-remise: #14532d;
+  --kip-erreur: #a3271c;
+  --kip-erreur-fond: #fdecea;
+  --kip-rayon: 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: var(--kip-encre);
+  background: var(--kip-fond);
+  font-size: 15px;
+  line-height: 1.5;
+
+  /* 🚨 Sans cette déclaration, le `@container` plus bas ne s'applique JAMAIS et
+   * la règle meurt en silence : le tunnel resterait en une colonne partout sans
+   * qu'aucune erreur ne le signale. Le conteneur est le formulaire, l'élément
+   * interrogé est son enfant `__colonnes` — jamais le même élément, sinon la
+   * mesure retombe sur le viewport. */
+  container-type: inline-size;
+  container-name: kip-pay;
+}
+
+/* --- mise en colonnes ---
+ *
+ * En une colonne, le tunnel fait ~830 px : il déborde de tout portable et d'une
+ * bonne partie des écrans 13". Mesuré bloc par bloc, le récapitulatif en prend 28 %
+ * à lui seul — le mettre à CÔTÉ du paiement plutôt qu'au-dessus supprime la moitié
+ * de la hauteur sans rien retirer.
+ *
+ * 🚨 Le seuil est en `min-width` sur le CONTENEUR du tunnel, pas sur la fenêtre :
+ * la même modale peut être posée dans une boîte étroite sur un site et large sur un
+ * autre. Une media query sur le viewport mettrait deux colonnes dans 480 px de large.
+ */
+.kip-pay__colonnes { display: flex; flex-direction: column; gap: 18px; }
+.kip-pay__col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+@container kip-pay (min-width: 680px) {
+  .kip-pay__colonnes {
+    display: grid;
+    /* Le paiement est la colonne haute : on lui donne la part large, sinon le
+     * récapitulatif étire un vide à gauche pour rien. */
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 28px;
+    align-items: start;
+  }
+  /* Sous le récapitulatif et non plus centrée sous le bouton : elle comble le
+   * creux de la colonne gauche au lieu d'ajouter une ligne en bas. */
+  .kip-pay__col--resume .kip-pay__note { text-align: left; margin-top: -4px; }
+}
+
+.kip-pay__sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+/* --- marque du site --- */
+.kip-pay__marque { display: flex; align-items: center; gap: 10px; }
+.kip-pay__logo { display: block; width: 36px; height: 36px; flex: none; }
+.kip-pay__site { font-weight: 600; font-size: 15px; }
+
+/* --- récapitulatif --- */
+.kip-pay__recap {
+  background: var(--kip-fond-recap);
+  border: 1px solid var(--kip-filet);
+  border-radius: var(--kip-rayon);
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.kip-pay__ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.kip-pay__ligne + .kip-pay__ligne { margin-top: 8px; }
+.kip-pay__ligne-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kip-pay__ligne-nom { font-weight: 600; font-size: 14.5px; }
+.kip-pay__qte { font-weight: 400; color: var(--kip-encre-douce); margin-left: 4px; }
+/* 🚨 Bornée à deux lignes : sur succession-simulateur la description prenait 75 px
+ * des 233 px du récapitulatif, pour un texte que l'acheteur vient de lire sur la page
+ * d'où il a cliqué. Le titre reste entier, lui : c'est ce qu'on achète. */
+.kip-pay__ligne-desc {
+  font-size: 12.5px; color: var(--kip-encre-douce);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.kip-pay__ligne-prix { font-weight: 600; font-size: 14.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.kip-pay__periode { display: block; font-weight: 400; font-size: 11.5px; color: var(--kip-encre-douce); text-align: right; }
+
+.kip-pay__totaux { margin: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 10px; border-top: 1px solid var(--kip-filet); }
+.kip-pay__paire { display: flex; justify-content: space-between; gap: 14px; font-size: 13.5px; }
+.kip-pay__paire dt { margin: 0; color: var(--kip-encre-douce); }
+.kip-pay__paire dd { margin: 0; font-variant-numeric: tabular-nums; }
+.kip-pay__paire--remise dd { color: var(--kip-remise); }
+.kip-pay__paire--total { font-size: 15.5px; font-weight: 700; padding-top: 5px; border-top: 1px solid var(--kip-filet); }
+.kip-pay__paire--total dt { color: var(--kip-encre); }
+
+/* --- code promo --- */
+.kip-pay__promo > summary {
+  cursor: pointer; font-size: 13px; color: var(--kip-encre-douce);
+  list-style: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.kip-pay__promo > summary::-webkit-details-marker { display: none; }
+.kip-pay__promo > summary::before { content: "+"; width: 9px; }
+.kip-pay__promo[open] > summary::before { content: "–"; }
+.kip-pay__promo > summary:hover { color: var(--kip-encre); }
+.kip-pay__promo-saisie { display: flex; gap: 8px; margin-top: 9px; }
+.kip-pay__promo-saisie input {
+  flex: 1; min-width: 0; font: inherit; font-size: 14px;
+  padding: 9px 11px; border: 1px solid var(--kip-filet);
+  border-radius: 6px; background: var(--kip-fond); color: var(--kip-encre);
+}
+.kip-pay__promo-btn {
+  font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  padding: 9px 14px; border-radius: 6px;
+  border: 1px solid var(--kip-encre); background: transparent; color: var(--kip-encre);
+}
+.kip-pay__promo-btn:hover:not(:disabled) { background: var(--kip-encre); color: var(--kip-fond); }
+.kip-pay__promo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.kip-pay__promo-erreur { margin: 8px 0 0; font-size: 12.5px; color: var(--kip-erreur); }
+.kip-pay__promo-actif { margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; }
+.kip-pay__promo-retirer {
+  font: inherit; font-size: 12.5px; cursor: pointer; padding: 0;
+  border: 0; background: none; color: var(--kip-encre-douce); text-decoration: underline;
+}
+.kip-pay__promo-retirer:hover { color: var(--kip-erreur); }
+
+/* --- paiement en un clic --- */
+.kip-pay__express { display: flex; flex-direction: column; gap: 8px; }
+.kip-pay__ou {
+  display: flex; align-items: center; gap: 12px;
+  margin: 4px 0 0; font-size: 12.5px; color: var(--kip-encre-douce);
+}
+.kip-pay__ou::before, .kip-pay__ou::after {
+  content: ""; flex: 1; height: 1px; background: var(--kip-filet);
+}
+
+/* --- champs --- */
+.kip-pay__champ { display: flex; flex-direction: column; gap: 7px; }
+.kip-pay__label {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--kip-encre-douce);
+}
+.kip-pay__conditions:empty { display: none; }
+.kip-pay__conditions { font-size: 12px; color: var(--kip-encre-douce); }
+
+/* --- action --- */
+.kip-pay__bouton {
+  appearance: none; border: 0; border-radius: var(--kip-rayon);
+  background: var(--kip-action); color: var(--kip-action-encre);
+  font: inherit; font-weight: 600; font-size: 16px;
+  padding: 14px 18px; cursor: pointer; transition: opacity 0.15s ease;
+}
+.kip-pay__bouton:hover:not(:disabled) { opacity: 0.9; }
+.kip-pay__bouton:disabled { opacity: 0.5; cursor: not-allowed; }
+/* 🚨 `opacity` rend le bouton TRANSPARENT. Tant qu'il était en bas de page ça ne se
+ * voyait pas ; collé en bas sur téléphone, le contenu défile VISIBLEMENT à travers et
+ * le total devient illisible. On atténue donc la couleur, pas l'élément. */
+@supports (background: color-mix(in srgb, red 50%, white)) {
+  .kip-pay__bouton:disabled {
+    opacity: 1;
+    background: color-mix(in srgb, var(--kip-action) 42%, var(--kip-fond));
+  }
+}
+.kip-pay__bouton:focus-visible { outline: 2px solid var(--kip-action); outline-offset: 2px; }
+
+/* Sur téléphone le tunnel fait ~870 px : le bouton de paiement est hors écran et
+ * le reste après trois écrans de défilement. Collé en bas, il reste sous le pouce
+ * pendant tout le remplissage. En deux colonnes il n'y a rien à coller : tout tient.
+ * 🚨 Le fond opaque n'est pas décoratif — sans lui le contenu défile SOUS le bouton
+ * et le total devient illisible au moment précis où on le lit. */
+@container kip-pay (max-width: 679.98px) {
+  /* 🚨 Ne PAS rendre la colonne collante : elle se met alors à flotter par-dessus le
+   * récapitulatif et les deux textes se superposent. Seul le bouton colle. */
+  .kip-pay__bouton {
+    position: sticky;
+    bottom: 12px;
+    box-shadow: 0 0 0 8px var(--kip-fond), 0 6px 20px -8px rgb(0 0 0 / 0.35);
+  }
+}
+
+.kip-pay__erreur {
+  margin: 0; padding: 10px 12px; border-radius: var(--kip-rayon);
+  background: var(--kip-erreur-fond); color: var(--kip-erreur); font-size: 14px;
+}
+.kip-pay__note { margin: 0; font-size: 12.5px; color: var(--kip-encre-douce); text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kip-pay__bouton { transition: none; }
+}

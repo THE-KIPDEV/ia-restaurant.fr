@@ -23,6 +23,18 @@ export function SubscribeButton({
     }
     setLoading(true);
     try {
+      // kip-pay:bouton — le paiement se fait dans la page, à la marque du site.
+      // La page hébergée de Stripe reste le repli : le tunnel y bascule seul.
+      const kipTunnel = (globalThis as { KipPayTunnel?: { ouvrir: (o: Record<string, unknown>) => void } }).KipPayTunnel;
+      if (kipTunnel) {
+        kipTunnel.ouvrir({
+          endpoint: "/api/stripe/checkout",
+          payload: { priceId },
+          logoUrl: "/favicon.svg",
+          siteName: "Ia Restaurant",
+        });
+        return;
+      }
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

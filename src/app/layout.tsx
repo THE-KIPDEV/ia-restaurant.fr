@@ -74,6 +74,11 @@ export default function RootLayout({
             },
           }}
         />
+              {/* kip-pay:gabarit : le paiement se fait dans la page, à la marque du site.
+            La colle se repère seule pour trouver son module, et la clé publique
+            revient avec la session — rien à déclarer au build. */}
+        <link rel="stylesheet" href="/kip-pay.css" />
+        <script src="/js/kip-pay-tunnel.js" defer />
       </body>
     </html>
   );
