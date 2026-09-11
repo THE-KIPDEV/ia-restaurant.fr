@@ -4,6 +4,7 @@ import { getStripe, TOKEN_PACKS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { siteConfig } from "@/lib/config";
+import { avecLibelle } from "../../../../lib/libelle-releve";
 
 export async function POST(req: NextRequest) {
   // kip-pay:route : le tunnel intégré s'annonce par un en-tête.
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
       tokenAmount: String(amount),
     };
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create(avecLibelle({
       customer: customerId,
       mode: "payment",
       payment_method_types: ["card"],
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
         : { after_expiration: { recovery: { enabled: true } }, success_url: `${siteConfig.url}/dashboard/tokens?success=true`, cancel_url: `${siteConfig.url}/dashboard/tokens?canceled=true` }),
       metadata,
       payment_intent_data: { metadata },
-    }, {
+    }), {
       // 🚨 Cette requête SEULE part en 2025-03-31.basil : la version
       // épinglée du site est plus ancienne et refuserait `ui_mode`.
       // Monter le SDK la changerait pour les webhooks aussi.
