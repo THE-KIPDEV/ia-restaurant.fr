@@ -35,7 +35,10 @@
    * fichier. `asset()` ajoute un `?v=…`, d'où la partie optionnelle.
    */
   var MOI = document.currentScript && document.currentScript.src;
-  var MODULE = MOI ? MOI.replace(/kip-pay-tunnel\.js(\?.*)?$/, "kip-pay.js")
+  // 🚨 Le `?v=` de la colle est REPORTÉ sur le module (le `$1`). Les fichiers sont
+  //    servis `immutable` pendant 30 jours : importé sans lui, le module restait
+  //    l'ancien chez tout visiteur déjà venu, correctif compris (relevé le 13/09/2026).
+  var MODULE = MOI ? MOI.replace(/kip-pay-tunnel\.js(\?.*)?$/, "kip-pay.js$1")
                    : "/js/kip-pay.js";
   var stripePret = null;
 

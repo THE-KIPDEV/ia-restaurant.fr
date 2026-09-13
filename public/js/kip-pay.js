@@ -231,6 +231,30 @@ export async function mountKipPay(container, o) {
   if (chargement.type !== "success") return echec(t.erreurSession);
   const actions = chargement.actions;
 
+  /**
+   * Le paiement en un clic (Link, Apple Pay, Google Pay, Amazon Pay).
+   *
+   * 🚨 Il ne s'achève PAS tout seul. Quand l'acheteur valide dans la feuille du
+   *    portefeuille, l'élément émet `confirm`, et c'est à l'intégration de le
+   *    transmettre à `actions.confirm()` — doc Stripe « Accept a payment with the
+   *    Express Checkout Element », variante Checkout Sessions. Ce module ne le
+   *    faisait pas : le bouton s'affichait (souvent Link, avec la carte enregistrée
+   *    du visiteur), la feuille s'ouvrait, et le paiement n'aboutissait jamais.
+   *    Seul le formulaire carte, qui passe par le submit, pouvait encaisser.
+   *    Relevé le 13/09/2026 sur les 92 copies du parc.
+   */
+  const confirmerExpress = async (event) => {
+    effacerErreur();
+    const r = await actions.confirm({ expressCheckoutConfirmEvent: event });
+    // En cas de succès Stripe redirige vers le return_url : on ne repasse ici
+    // qu'en cas d'échec, ou si le paiement a abouti sans redirection.
+    if (r && r.type === "error") {
+      montrerErreur(r.error && r.error.message ? r.error.message : t.erreurSession);
+      return;
+    }
+    if (o.onSuccess) o.onSuccess(actions.getSession());
+  };
+
   const elements = [];
 
   /**
@@ -269,8 +293,11 @@ export async function mountKipPay(container, o) {
     // Agrément — le chemin le plus court vers le paiement, quand l'appareil le permet.
     monter('[data-kip="express"]', () => checkout.createExpressCheckoutElement({ buttonHeight: 44 }), {
       surEchec: () => { blocExpress.hidden = true; },
-      avantMontage: (el) =>
-        el.on("ready", (e) => {
+      avantMontage: (el) => {
+        // 🚨 Voir `confirmerExpress` : sans ce gestionnaire, le paiement en un clic
+        //    ne s'achève jamais.
+        el.on("confirm", confirmerExpress);
+        return el.on("ready", (e) => {
           // 🚨 L'élément se monte même quand aucun portefeuille n'est disponible : sans
           //    ce test, on afficherait un cadre vide surmonté d'un séparateur « ou payer
           //    par carte » qui ne sépare rien. Stripe renvoie `undefined` quand rien
@@ -279,7 +306,8 @@ export async function mountKipPay(container, o) {
           const dispo = e && e.availablePaymentMethods;
           const auMoinsUn = dispo && Object.values(dispo).some(Boolean);
           blocExpress.hidden = !auMoinsUn;
-        }),
+        });
+      },
     });
 
     // Indispensables : sans eux il n'y a pas de paiement possible.
