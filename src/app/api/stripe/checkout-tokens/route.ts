@@ -68,12 +68,13 @@ export async function POST(req: NextRequest) {
         : { after_expiration: { recovery: { enabled: true } }, success_url: `${siteConfig.url}/dashboard/tokens?success=true`, cancel_url: `${siteConfig.url}/dashboard/tokens?canceled=true` }),
       metadata,
       payment_intent_data: { metadata },
-    }), {
+    }),
       // 🚨 Cette requête SEULE part en 2025-03-31.basil : la version
       // épinglée du site est plus ancienne et refuserait `ui_mode`.
       // Monter le SDK la changerait pour les webhooks aussi.
-      ...(kipIntegre ? { apiVersion: "2025-03-31.basil" as const } : {}),
-    });
+      // 🚨 `undefined`, jamais `{}` : stripe-node 17 refuse un objet d'options vide (500 sur la page hébergée, repli du tunnel).
+      kipIntegre ? { apiVersion: "2025-03-31.basil" as const } : undefined,
+    );
 
     return NextResponse.json(
     kipIntegre

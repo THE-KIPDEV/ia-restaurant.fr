@@ -59,12 +59,13 @@ export async function POST(req: NextRequest) {
            { success_url: string; cancel_url: string })
         : { after_expiration: { recovery: { enabled: true } }, success_url: `${siteConfig.url}/dashboard/billing?success=true`, cancel_url: `${siteConfig.url}/dashboard/billing?canceled=true` }),
       metadata: { userId: user.id, site: "ia-restaurant.fr" },
-    }), {
+    }),
       // 🚨 Cette requête SEULE part en 2025-03-31.basil : la version
       // épinglée du site est plus ancienne et refuserait `ui_mode`.
       // Monter le SDK la changerait pour les webhooks aussi.
-      ...(kipIntegre ? { apiVersion: "2025-03-31.basil" as const } : {}),
-    });
+      // 🚨 `undefined`, jamais `{}` : stripe-node 17 refuse un objet d'options vide (500 sur la page hébergée, repli du tunnel).
+      kipIntegre ? { apiVersion: "2025-03-31.basil" as const } : undefined,
+    );
 
     return NextResponse.json(
     kipIntegre
