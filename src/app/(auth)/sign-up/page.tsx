@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChefHat } from "lucide-react";
 import { track } from "@/lib/kipstats";
 
 export default function SignUpPage() {
+  const [selectedPlan,setSelectedPlan]=useState("");
+  useEffect(()=>{const plan=new URLSearchParams(window.location.search).get("plan");if(plan==="pro"||plan==="business")setSelectedPlan(plan);},[]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +31,7 @@ export default function SignUpPage() {
         return;
       }
       track("signup", {});
-      window.location.href = "/dashboard";
+      window.location.href = selectedPlan ? `/dashboard/billing?plan=${selectedPlan}` : "/dashboard/review-responder";
     } catch {
       setError("Une erreur est survenue.");
       setLoading(false);
@@ -61,10 +63,11 @@ export default function SignUpPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm text-text-secondary">
+              <label htmlFor="auth-name" className="mb-1 block text-sm text-text-secondary">
                 Nom
               </label>
               <input
+                id="auth-name"
                 type="text"
                 required
                 value={name}
@@ -74,10 +77,11 @@ export default function SignUpPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm text-text-secondary">
+              <label htmlFor="auth-email" className="mb-1 block text-sm text-text-secondary">
                 Email
               </label>
               <input
+                id="auth-email"
                 type="email"
                 required
                 value={email}
@@ -87,10 +91,11 @@ export default function SignUpPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm text-text-secondary">
+              <label htmlFor="auth-password" className="mb-1 block text-sm text-text-secondary">
                 Mot de passe
               </label>
               <input
+                id="auth-password"
                 type="password"
                 required
                 minLength={8}
@@ -111,7 +116,7 @@ export default function SignUpPage() {
 
           <p className="mt-6 text-center text-sm text-text-secondary">
             Déjà un compte ?{" "}
-            <Link href="/sign-in" className="text-neon hover:text-neon-dim">
+            <Link href={selectedPlan ? `/sign-in?plan=${selectedPlan}` : "/sign-in"} className="text-neon hover:text-neon-dim">
               Connexion
             </Link>
           </p>

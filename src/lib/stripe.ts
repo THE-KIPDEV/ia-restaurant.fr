@@ -56,9 +56,9 @@ export const PLANS = {
       { en: "10,000 AI tokens/month", fr: "10 000 jetons IA/mois" },
       { en: "Unlimited restaurants", fr: "Restaurants illimités" },
       { en: "All Pro features", fr: "Toutes les fonctions Pro" },
-      { en: "Bulk operations", fr: "Opérations en masse" },
-      { en: "API access", fr: "Accès API" },
-      { en: "Dedicated support", fr: "Support dédié" },
+      { en: "Up to 2,000 review drafts/month using the included credits", fr: "Jusqu’à 2 000 réponses aux avis/mois avec les crédits inclus" },
+
+
     ],
   },
 } as const;

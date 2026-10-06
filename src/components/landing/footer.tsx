@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConsentSettings from "@/components/ConsentSettings";
 import { ChefHat, ArrowUpRight } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { createT } from "@/lib/i18n";
@@ -35,12 +36,12 @@ export function Footer({ locale }: { locale: Locale }) {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link href="#features" className="text-sm text-text-muted hover:text-neon transition-colors">
+                <Link href="/#features" className="text-sm text-text-muted hover:text-neon transition-colors">
                   {t("nav.features")}
                 </Link>
               </li>
               <li>
-                <Link href="#pricing" className="text-sm text-text-muted hover:text-neon transition-colors">
+                <Link href="/#pricing" className="text-sm text-text-muted hover:text-neon transition-colors">
                   {t("nav.pricing")}
                 </Link>
               </li>
@@ -131,6 +132,7 @@ export function Footer({ locale }: { locale: Locale }) {
         )}
 
         <div className="mt-10 border-t border-border-dim pt-6">
+          <div className="mb-4 text-center"><ConsentSettings locale={locale}/></div>
           <p className="text-center text-xs text-text-muted">
             &copy; {year} Kipdev — IA Restaurant. {t("footer.rights")}
           </p>

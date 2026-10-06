@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: {canonical: "https://ia-restaurant.fr/privacy"},
   title: "Politique de confidentialité",
   description: "Politique de confidentialité d'IA Restaurant — ia-restaurant.fr",
 };
@@ -9,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-32 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold gradient-text">Politique de confidentialité</h1>
-      <p className="mt-2 text-sm text-text-muted">Dernière mise à jour : mars 2026</p>
+      <p className="mt-2 text-sm text-text-muted">Dernière mise à jour : 7 octobre 2026</p>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-text-secondary">
         <section>
@@ -21,7 +22,7 @@ export default function PrivacyPage() {
           <h2 className="mb-2 text-lg font-semibold text-text-primary">2. Données collectées</h2>
           <p>Nous collectons les données suivantes :</p>
           <ul className="ml-4 mt-2 list-disc space-y-1">
-            <li>Données d&apos;identification : nom, email (authentification gérée en interne, mots de passe chiffrés via bcrypt)</li>
+            <li>Données d&apos;identification : nom, email (authentification gérée en interne, mots de passe hachés avec bcrypt)</li>
             <li>Données de paiement : gérées par Stripe (nous ne stockons pas vos coordonnées bancaires)</li>
             <li>Données d&apos;utilisation : restaurants, plats, historique d&apos;utilisation IA</li>
             <li>Données techniques : cookies, adresse IP, type de navigateur</li>
@@ -40,7 +41,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-text-primary">4. IA et données</h2>
-          <p>Vos données envoyées à l&apos;IA (descriptions de plats, avis, menus) sont traitées par Claude d&apos;Anthropic. Ces données ne sont pas utilisées pour entraîner des modèles d&apos;IA. Elles sont traitées de manière éphémère pour générer les résultats demandés.</p>
+          <p>Vos données envoyées à l&apos;IA (descriptions de plats, avis, menus) sont traitées par Claude d&apos;Anthropic. Le texte est transmis pour produire le brouillon demandé. L’historique de votre compte conserve jusqu’à 2 000 caractères de la saisie et du résultat. Retirez les coordonnées ou informations confidentielles qui ne sont pas nécessaires.</p>
         </section>
 
         <section>
@@ -55,7 +56,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-text-primary">7. Cookies</h2>
-          <p>Nous utilisons des cookies essentiels (authentification, préférences de langue) et analytiques. Vous pouvez les gérer via les paramètres de votre navigateur.</p>
+          <p>Les cookies nécessaires servent à l’authentification et à la langue. OrbeConsent mémorise votre choix pendant six mois ; Kipstats mesure les visites seulement avec votre accord. Modifiez ce choix avec « Gérer mes cookies » en pied de page.</p>
         </section>
 
         <section>
@@ -63,7 +64,8 @@ export default function PrivacyPage() {
           <ul className="ml-4 list-disc space-y-1">
             <li>Stripe (paiements) — USA</li>
             <li>Anthropic (IA) — USA</li>
-            <li>Railway (hébergement) — USA</li>
+            <li>Hostinger (hébergement)</li>
+            <li>OrbeConsent (préférences de cookies) et Kipstats (statistiques facultatives)</li>
           </ul>
         </section>
       </div>

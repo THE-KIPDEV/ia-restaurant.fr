@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import {getLocale} from "@/lib/i18n";
+import ConsentScripts from "@/components/ConsentScripts";
 import { Toaster } from "sonner";
 import { siteConfig } from "@/lib/config";
 import "@/styles/globals.css";
@@ -37,34 +39,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale=await getLocale();
   return (
-    <html lang="fr" className="dark">
-      <head>
-        <script
-          defer
-          src="https://kipstats.com/tracker.js"
-          data-site="kp_edd03c1b"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang={locale}>
       <body className="min-h-screen bg-surface-0 text-text-primary antialiased">
+        <ConsentScripts />
         {children}
         <Toaster
-          theme="dark"
+          theme="light"
           position="bottom-right"
           toastOptions={{
             style: {

@@ -107,7 +107,7 @@ export function Pricing({ locale }: { locale: Locale }) {
                 </ul>
 
                 <Link
-                  href={key === "free" ? "/sign-up" : "/sign-up"}
+                  href={key === "free" ? "/sign-up" : `/sign-up?plan=${key}`}
                   onClick={() => track("cta_click", { cta: `pricing_${key}` })}
                   className={`mt-8 block w-full rounded-lg py-2.5 text-center text-sm font-semibold transition-all ${
                     popular

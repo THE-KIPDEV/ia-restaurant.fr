@@ -1,61 +1,13 @@
-import { Hero } from "@/components/landing/hero";
-import { Features } from "@/components/landing/features";
-import { Pricing } from "@/components/landing/pricing";
-import { FAQ } from "@/components/landing/faq";
-import { getLocale } from "@/lib/i18n";
-import { siteConfig } from "@/lib/config";
-
-export default async function HomePage() {
-  const locale = await getLocale();
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: siteConfig.name,
-    description:
-      locale === "fr" ? siteConfig.descriptionFr : siteConfig.description,
-    url: siteConfig.url,
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
-    offers: [
-      {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "EUR",
-        name: "Free",
-      },
-      {
-        "@type": "Offer",
-        price: "29",
-        priceCurrency: "EUR",
-        name: "Pro",
-        billingIncrement: "P1M",
-      },
-      {
-        "@type": "Offer",
-        price: "79",
-        priceCurrency: "EUR",
-        name: "Business",
-        billingIncrement: "P1M",
-      },
-    ],
-    creator: {
-      "@type": "Organization",
-      name: "Kipdev",
-      url: "https://www.pappers.fr/entreprise/kipdev-884120890",
-    },
-  };
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <Hero locale={locale} />
-      <Features locale={locale} />
-      <Pricing locale={locale} />
-      <FAQ locale={locale} />
-    </>
-  );
+import type { Metadata } from "next";
+import Link from "next/link";
+import {getLocale} from "@/lib/i18n";
+export const metadata:Metadata={title:{absolute:"Répondre aux avis de votre restaurant | IA Restaurant"},description:"Préparez une réponse personnalisée aux avis Google ou Tripadvisor, ajustez le ton et relisez avant de publier. 10 réponses avec les crédits gratuits mensuels.",alternates:{canonical:"https://ia-restaurant.fr/"},openGraph:{title:"Vos avis méritent une vraie réponse.",description:"Un brouillon adapté à chaque avis, que vous relisez et modifiez avant publication.",url:"https://ia-restaurant.fr/"}};
+export default async function HomePage(){const fr=(await getLocale())==="fr";
+ const plans=[{name:fr?"Découverte":"Free",price:0,replies:10,credits:50},{name:"Pro",price:29,replies:400,credits:2000},{name:"Business",price:79,replies:2000,credits:10000}];
+ const ld={"@context":"https://schema.org","@type":"SoftwareApplication",name:"IA Restaurant",url:"https://ia-restaurant.fr/",applicationCategory:"BusinessApplication",operatingSystem:"Web",offers:plans.map(p=>({"@type":"Offer",name:p.name,price:p.price,priceCurrency:"EUR",priceSpecification:{"@type":"UnitPriceSpecification",price:p.price,priceCurrency:"EUR",unitText:"MONTH"}}))};
+ return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(ld)}}/>
+ <section className="mx-auto max-w-4xl px-6 pb-16 pt-32 text-center sm:pt-40"><p className="text-sm font-medium text-neon">{fr?"Un outil pour vos avis clients":"One tool for your customer reviews"}</p><h1 className="mx-auto mt-5 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">{fr?<>Vos avis méritent<br/>une vraie réponse.</>:<>Your reviews deserve<br/>a thoughtful reply.</>}</h1><p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-text-secondary">{fr?"Collez un avis, choisissez votre ton et préparez un brouillon adapté à votre restaurant. Vous gardez le dernier mot avant de publier.":"Paste a review, choose your tone and prepare a draft for your restaurant. You have the final say before posting."}</p><Link href="/sign-up" className="btn-primary mt-8 inline-flex px-7 py-3.5">{fr?"Rédiger ma première réponse ↗":"Draft my first reply ↗"}</Link><p className="mt-4 text-sm text-text-secondary">{fr?"10 réponses avec les crédits gratuits · Sans carte bancaire":"10 replies with free credits · No credit card"}</p></section>
+ <section id="features" className="mx-auto max-w-5xl px-6 py-12"><div className="grid gap-6 sm:grid-cols-3">{(fr?[["01","L’avis, tel qu’il est","Une remarque positive, une déception ou une question : partez du message de votre client."],["02","Le ton de votre restaurant","Une réponse professionnelle, chaleureuse ou empathique. En français ou en anglais."],["03","Votre validation","Modifiez le brouillon, puis copiez-le. Aucune réponse n’est publiée automatiquement."]]:[["01","Start with the review","A compliment, a concern or a question: start with what your customer wrote."],["02","Your restaurant’s voice","Professional, warm or apologetic. In French or English."],["03","Your approval","Edit the draft, then copy it. Replies are never posted automatically."]]).map(([n,title,text])=><article key={n} className="border-t border-border-default pt-5"><p className="text-sm text-neon">{n}</p><h2 className="mt-4 text-xl font-semibold">{title}</h2><p className="mt-3 text-sm leading-relaxed text-text-secondary">{text}</p></article>)}</div></section>
+ <section id="pricing" className="border-y border-border-dim bg-surface-1"><div className="mx-auto max-w-5xl px-6 py-16"><h2 className="text-3xl font-semibold tracking-tight">{fr?"Un petit essai. Puis le volume qui vous convient.":"Try it first. Then choose your volume."}</h2><p className="mt-4 text-text-secondary">{fr?"Une génération réussie utilise 5 crédits. Un échec technique ne les consomme pas.":"A successful draft uses 5 credits. Technical failures do not consume them."}</p><div className="mt-8 grid gap-4 md:grid-cols-3">{plans.map(p=><article key={p.name} className="rounded-2xl border border-border-default bg-white p-6"><h3 className="font-semibold">{p.name}</h3><p className="mt-4"><strong className="text-3xl">{p.price} €</strong><span className="text-sm text-text-secondary"> / {fr?"mois":"month"}</span></p><p className="mt-4 font-medium">{fr?"Jusqu’à":"Up to"} {p.replies.toLocaleString(fr?"fr-FR":"en-US")} {fr?"réponses / mois":"replies / month"}</p><p className="mt-2 text-sm text-text-secondary">{p.credits.toLocaleString(fr?"fr-FR":"en-US")} {fr?"crédits mensuels, partagés avec les outils complémentaires.":"monthly credits, shared with the additional tools."}</p><Link href={p.price===0?"/sign-up":`/sign-up?plan=${p.name.toLowerCase()}`} className="btn-secondary mt-6 inline-flex">{p.price===0?(fr?"Essayer gratuitement":"Try for free"):(fr?"Choisir mon offre":"Choose my plan")}</Link></article>)}</div><p className="mt-5 text-sm text-text-secondary">{fr?"Les abonnements et packs de crédits existants restent disponibles dans votre espace de facturation.":"Subscriptions and credit packs are available in your billing area."}</p></div></section>
+ <section className="mx-auto max-w-3xl px-6 py-16"><h2 className="text-2xl font-semibold">{fr?"Vos clients parlent. À vous de répondre.":"Your customers are talking. It’s your turn."}</h2><p className="mt-4 leading-relaxed text-text-secondary">{fr?"Le brouillon traite les points de l’avis sans promettre un remboursement, une réservation ou un geste commercial que vous n’avez pas décidé. Relisez toujours les faits et adaptez les mots à votre équipe.":"The draft addresses the review without inventing a refund, a booking or an offer you have not approved. Check the facts and make the wording your own."}</p><Link href="/seo/repondre-avis-google-restaurant" className="mt-5 inline-flex font-medium text-neon underline underline-offset-4">{fr?"Lire nos conseils pour répondre aux avis →":"Read our review response guide →"}</Link></section></>;
 }

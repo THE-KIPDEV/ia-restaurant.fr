@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "change-me-in-production-ia-restaurant"
-);
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -17,9 +15,9 @@ const PROTECTED_PREFIXES = [
 
 async function isAuthenticated(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get("token")?.value;
-  if (!token) return false;
+  if (!token || !JWT_SECRET) return false;
   try {
-    await jwtVerify(token, JWT_SECRET);
+    await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
     return true;
   } catch {
     return false;
@@ -36,6 +34,16 @@ export default async function middleware(req: NextRequest) {
       `https://${apex}`
     );
     return NextResponse.redirect(url, 301);
+  }
+
+  const locale = req.nextUrl.searchParams.get("locale");
+  if (locale === "fr" || locale === "en") {
+    const localHost = /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host);
+    const url = new URL(req.nextUrl.pathname + req.nextUrl.search, localHost ? `http://${host}` : "https://ia-restaurant.fr");
+    url.searchParams.delete("locale");
+    const response = NextResponse.redirect(url);
+    response.cookies.set("locale", locale, {path:"/",sameSite:"lax",httpOnly:true,secure:url.protocol==="https:",maxAge:31536000});
+    return response;
   }
 
   // 2) Auth protection (edge — JWT signature verify only, no Prisma)

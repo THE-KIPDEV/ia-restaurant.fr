@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "IA Restaurant",
-  description: "AI-powered restaurant management platform",
+  description: "Draft thoughtful replies to your restaurant reviews",
   descriptionFr: "Plateforme IA pour la gestion de restaurant",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://ia-restaurant.fr",
   domain: "ia-restaurant.fr",

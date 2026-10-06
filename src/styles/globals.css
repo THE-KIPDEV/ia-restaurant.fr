@@ -2,28 +2,28 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-neon: #00f5ff;
-  --color-neon-dim: #00c4cc;
+  --color-neon: #245c47;
+  --color-neon-dim: #1b4836;
   --color-neon-glow: rgba(0, 245, 255, 0.15);
   --color-neon-glow-strong: rgba(0, 245, 255, 0.3);
   --color-purple: #7c3aed;
   --color-purple-dim: #6d28d9;
   --color-purple-glow: rgba(124, 58, 237, 0.15);
-  --color-surface-0: #000000;
-  --color-surface-1: #07070e;
-  --color-surface-2: #0f0f1a;
-  --color-surface-3: #161625;
-  --color-surface-4: #1e1e32;
-  --color-surface-5: #28283f;
-  --color-border-dim: #1a1a2e;
-  --color-border-default: #2a2a40;
-  --color-border-bright: #3a3a55;
-  --color-text-primary: #f0f0f8;
-  --color-text-secondary: #a0a0b8;
-  --color-text-muted: #6a6a82;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-surface-0: #ffffff;
+  --color-surface-1: #fafbf9;
+  --color-surface-2: #ffffff;
+  --color-surface-3: #f4f6f3;
+  --color-surface-4: #e9ede8;
+  --color-surface-5: #d5dcd4;
+  --color-border-dim: #e1e6df;
+  --color-border-default: #c8d1c6;
+  --color-border-bright: #9fae9d;
+  --color-text-primary: #18251e;
+  --color-text-secondary: #4b5c51;
+  --color-text-muted: #59685e;
+  --color-success: #166534;
+  --color-warning: #92400e;
+  --color-danger: #b91c1c;
 }
 
 @layer base {
@@ -367,3 +367,16 @@
     50% { opacity: 0.7; }
   }
 }
+
+@font-face { font-family: Inter; src: url('/fonts/inter-latin.woff2') format('woff2'); font-style: normal; font-weight: 100 900; font-display: swap; }
+.glass { background: rgba(255,255,255,.97); backdrop-filter: none; }
+.matrix-bg, .hero-gradient { background: none; }
+.neon-border, .neon-glow, .purple-glow { box-shadow: none; }
+.neon-text { text-shadow: none; }
+.gradient-text { background: none; -webkit-text-fill-color: currentColor; color: var(--color-text-primary); }
+.btn-primary { background: #245c47; color: white; border-radius: 9999px; }
+.btn-primary:hover { background: #1b4836; box-shadow: none; transform: none; }
+.btn-secondary, .btn-ghost { border-radius: 9999px; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid #245c47; outline-offset: 3px; }
+section[id] { scroll-margin-top: 6rem; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

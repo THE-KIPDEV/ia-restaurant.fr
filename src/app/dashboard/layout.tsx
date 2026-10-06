@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import type {Metadata} from "next";
+export const metadata:Metadata={robots:{index:false,follow:true,googleBot:{index:false,follow:true}}};
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { getCurrentUser, getUserPlan } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n";

@@ -66,10 +66,9 @@ export default function ReviewResponderPage() {
     }
   }
 
-  function handleCopy() {
-    navigator.clipboard.writeText(result);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  async function handleCopy() {
+    try { await navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+    catch { toast.error("Sélectionnez le texte pour le copier."); }
   }
 
   // La phrase est ajoutée en fin de réponse, jamais à la place de ce qui est
@@ -100,6 +99,8 @@ export default function ReviewResponderPage() {
             </label>
             <input
               type="text"
+              aria-label="Nom du restaurant"
+              maxLength={120}
               value={restaurantName}
               onChange={(e) => setRestaurantName(e.target.value)}
               placeholder="Ex: Le Petit Bistrot"
@@ -116,6 +117,8 @@ export default function ReviewResponderPage() {
                 <button
                   key={n}
                   onClick={() => setRating(n)}
+                  aria-label={`${n} étoile${n > 1 ? "s" : ""}`}
+                  aria-pressed={n === rating}
                   className="p-1"
                 >
                   <Star
@@ -136,6 +139,8 @@ export default function ReviewResponderPage() {
               Avis du client *
             </label>
             <textarea
+              aria-label="Avis du client"
+              maxLength={4000}
               value={review}
               onChange={(e) => setReview(e.target.value)}
               placeholder="Collez l'avis du client ici..."

@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { nextCreditMonth } from "./credit-period";
 import { TOKEN_COSTS, type AiFeatureKey } from "./config";
 import { PLANS, type PlanKey } from "./stripe";
 import type { AiFeature } from "@prisma/client";
@@ -86,13 +87,10 @@ export async function resetMonthlyTokens(userId: string): Promise<void> {
   const planKey = user.plan.toLowerCase() as PlanKey;
   const monthlyTokens = PLANS[planKey]?.tokens ?? 50;
 
-  const nextReset = new Date(now);
-  nextReset.setMonth(nextReset.getMonth() + 1);
-  nextReset.setDate(1);
-  nextReset.setHours(0, 0, 0, 0);
+  const nextReset = nextCreditMonth(now);
 
-  await prisma.user.update({
-    where: { id: userId },
+  await prisma.user.updateMany({
+    where: { id: userId, plan: user.plan, OR: [{tokenResetAt:null},{tokenResetAt:{lte:now}}] },
     data: {
       tokenBalance: monthlyTokens,
       tokenResetAt: nextReset,

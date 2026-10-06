@@ -3,6 +3,7 @@ import { getLocale } from "@/lib/i18n";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: {canonical: "https://ia-restaurant.fr/features"},
   title: "Fonctionnalités — 6 Outils IA pour Restaurateurs",
   description: "Menu engineering, descriptions de plats, réponses aux avis, posts réseaux sociaux, traduction de carte et analyse des marges — tout propulsé par l'IA Claude.",
 };
