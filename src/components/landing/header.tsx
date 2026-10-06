@@ -46,12 +46,12 @@ export function Header({ locale }: HeaderProps) {
             <Link href="/#pricing" className="text-sm text-text-secondary hover:text-neon transition-colors">
               {t.pricing}
             </Link>
-            <Link
+            <a
               href={locale === "fr" ? "/?locale=en" : "/?locale=fr"}
               className="text-sm text-text-muted hover:text-text-secondary transition-colors"
             >
               {locale === "fr" ? "EN" : "FR"}
-            </Link>
+            </a>
             {isSignedIn ? (
               <Link href="/dashboard/review-responder" className="btn-primary text-sm">
                 {t.dashboard}
