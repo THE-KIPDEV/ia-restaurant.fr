@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChefHat } from "lucide-react";
 
 export default function SignInPage() {
+  const [selectedPlan,setSelectedPlan]=useState("");
+  useEffect(()=>{const plan=new URLSearchParams(window.location.search).get("plan");if(plan==="pro"||plan==="business")setSelectedPlan(plan);},[]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +28,7 @@ export default function SignInPage() {
         setLoading(false);
         return;
       }
-      window.location.href = "/dashboard";
+      window.location.href = selectedPlan ? `/dashboard/billing?plan=${selectedPlan}` : "/dashboard";
     } catch {
       setError("Une erreur est survenue.");
       setLoading(false);
@@ -58,10 +60,11 @@ export default function SignInPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm text-text-secondary">
+              <label htmlFor="auth-email" className="mb-1 block text-sm text-text-secondary">
                 Email
               </label>
               <input
+                id="auth-email"
                 type="email"
                 required
                 value={email}
@@ -71,10 +74,11 @@ export default function SignInPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm text-text-secondary">
+              <label htmlFor="auth-password" className="mb-1 block text-sm text-text-secondary">
                 Mot de passe
               </label>
               <input
+                id="auth-password"
                 type="password"
                 required
                 value={password}
@@ -94,7 +98,7 @@ export default function SignInPage() {
 
           <p className="mt-6 text-center text-sm text-text-secondary">
             Pas encore de compte ?{" "}
-            <Link href="/sign-up" className="text-neon hover:text-neon-dim">
+            <Link href={selectedPlan ? `/sign-up?plan=${selectedPlan}` : "/sign-up"} className="text-neon hover:text-neon-dim">
               Inscription
             </Link>
           </p>

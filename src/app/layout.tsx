@@ -1,3 +1,5 @@
+import ConsentScripts from "@/components/ConsentScripts";
+import { getLocale } from "@/lib/i18n";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { siteConfig } from "@/lib/config";
@@ -38,34 +40,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale=await getLocale();
   return (
-    <html lang="fr">
-      <head>
-        <script src="https://orbeconsent.com/c/006f3daae259c24f.js" />
-        <script
-          suppressHydrationWarning
-          type="text/plain"
-          data-consent="mesure"
-          src="https://kipstats.com/tracker.js"
-          data-site="kp_edd03c1b"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang={locale}>
       <body className="min-h-screen bg-surface-0 text-text-primary antialiased">
+        <ConsentScripts />
         {children}
         <Toaster
           theme="light"

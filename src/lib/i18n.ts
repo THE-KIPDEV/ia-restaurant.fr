@@ -176,8 +176,8 @@ const translations = {
     en: "Is my data secure?",
   },
   "faq.a4": {
-    fr: "Absolument. Vos données sont chiffrées et ne sont jamais utilisées pour entraîner des modèles IA. Nous sommes conformes au RGPD.",
-    en: "Absolutely. Your data is encrypted and never used to train AI models. We are GDPR compliant.",
+    fr: "Les textes sont envoyés à Anthropic pour produire les résultats. Votre historique conserve un extrait des saisies et sorties. Retirez les informations personnelles inutiles ; notre politique de confidentialité décrit le traitement.",
+    en: "Text is sent to Anthropic to produce the result. Your history stores excerpts of inputs and outputs. Remove unnecessary personal details; our privacy policy describes the processing.",
   },
   "faq.q5": {
     fr: "Puis-je annuler à tout moment ?",
@@ -196,8 +196,8 @@ const translations = {
   "footer.terms": { fr: "Conditions d'utilisation", en: "Terms of Service" },
   "footer.legalNotice": { fr: "Mentions légales", en: "Legal Notice" },
   "footer.description": {
-    fr: "Plateforme IA pour restaurateurs. Optimisez votre carte, vos marges et votre présence en ligne.",
-    en: "AI platform for restaurant owners. Optimize your menu, margins and online presence.",
+    fr: "Des réponses aux avis adaptées à votre restaurant. Préparez, relisez et gardez le dernier mot.",
+    en: "Thoughtful replies to your restaurant reviews. Draft, edit and have the final say.",
   },
   "footer.rights": { fr: "Tous droits réservés.", en: "All rights reserved." },
 } as const;

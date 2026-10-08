@@ -40,6 +40,16 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
+  const locale = req.nextUrl.searchParams.get("locale");
+  if (locale === "fr" || locale === "en") {
+    const localHost = /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host);
+    const url = new URL(req.nextUrl.pathname + req.nextUrl.search, localHost ? `http://${host}` : "https://ia-restaurant.fr");
+    url.searchParams.delete("locale");
+    const response = NextResponse.redirect(url);
+    response.cookies.set("locale", locale, {path:"/",sameSite:"lax",httpOnly:true,secure:url.protocol==="https:",maxAge:31536000});
+    return response;
+  }
+
   // 2) Auth protection (edge — JWT signature verify only, no Prisma)
   const path = req.nextUrl.pathname;
   const isProtected = PROTECTED_PREFIXES.some(

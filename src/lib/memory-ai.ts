@@ -10,7 +10,7 @@ import { TOKEN_COSTS } from "./config";
 const replySchema=z.object({answer:z.string().min(1).max(10000),sources:z.array(z.string().max(100)).max(20),missing:z.array(z.string().max(250)).max(12).default([]),suggestedNote:z.string().max(2000).nullable().default(null)});
 export type CopilotReply=z.infer<typeof replySchema>;
 export function readJson(text:string){const clean=text.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"").trim();return JSON.parse(clean);}
-export async function reserveAI(userId:string,restaurantId:string,feature:"COPILOT"|"DOCUMENT_READING",requestId:string){
+export async function reserveAI(userId:string,restaurantId:string|null,feature:"COPILOT"|"DOCUMENT_READING"|"REVIEW_RESPONSE",requestId:string){
   const key=userId+":"+requestId;const old=await prisma.aiUsage.findUnique({where:{requestId:key}});
   if(old){if(old.restaurantId!==restaurantId||old.feature!==feature)throw new MemoryError(409,"Identifiant de demande déjà utilisé.");if(old.status==="completed")return {id:old.id,cached:old.outputData?JSON.parse(old.outputData):null,cost:old.tokensUsed};throw new MemoryError(409,old.status==="pending"?"Cette demande est déjà en cours.":"Cette demande a échoué. Relancez-la avec une nouvelle demande.");}
   const cost=TOKEN_COSTS[feature];

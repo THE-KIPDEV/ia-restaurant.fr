@@ -13,12 +13,13 @@ export const metadata: Metadata = { title: "Facturation" };
 export default async function BillingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string }>;
+  searchParams: Promise<{ success?: string; plan?: string }>;
 }) {
   const user = await requireUser();
   const locale = await getLocale();
   const plan = getUserPlan(user);
-  const { success } = await searchParams;
+  const { success,plan:requestedPlan } = await searchParams;
+  const selectedPlan=requestedPlan==="pro"||requestedPlan==="business"?requestedPlan:null;
   const purchasedPlan = plan.toLowerCase();
 
   return (
@@ -64,7 +65,7 @@ export default async function BillingPage({
           const p = PLANS[key];
           const isCurrent = plan === key.toUpperCase();
           return (
-            <div key={key} className={`card p-5 ${isCurrent ? "neon-border" : ""}`}>
+            <div key={key} className={`card p-5 ${isCurrent || selectedPlan===key ? "neon-border" : ""}`}>
               <h3 className="text-lg font-bold text-text-primary">
                 {locale === "fr" ? p.nameFr : p.name}
               </h3>

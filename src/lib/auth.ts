@@ -4,10 +4,9 @@ import { prisma } from "./prisma";
 import { resetMonthlyTokens } from "./tokens";
 import type { Plan, User } from "@prisma/client";
 
-function jwtSecret() {
-  const secret = process.env.JWT_SECRET;
-  if (!secret && process.env.NODE_ENV === "production") throw new Error("JWT_SECRET is required");
-  return new TextEncoder().encode(secret || "local-development-ia-restaurant");
+function signingKey() {
+  if (!process.env.JWT_SECRET) throw new Error("Authentication unavailable");
+  return new TextEncoder().encode(process.env.JWT_SECRET);
 }
 
 export async function createToken(userId: string): Promise<string> {
@@ -15,14 +14,14 @@ export async function createToken(userId: string): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
-    .sign(jwtSecret());
+    .sign(signingKey());
 }
 
 export async function verifyToken(
   token: string
 ): Promise<{ userId: string } | null> {
   try {
-    const { payload } = await jwtVerify(token, jwtSecret(), { algorithms: ["HS256"] });
+    const { payload } = await jwtVerify(token, signingKey(), { algorithms: ["HS256"] });
     return payload as { userId: string };
   } catch {
     return null;
