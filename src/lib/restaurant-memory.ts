@@ -57,11 +57,20 @@ export function latestPrices(items:MemoryItem[]){
   return Array.from(found.values());
 }
 export function recipeCost(recipe:Workspace["recipes"][number],workspace:Workspace){return Math.round(recipe.items.reduce((sum,item)=>sum+item.quantity*(workspace.ingredients.find(i=>i.id===item.ingredientId)?.price??0),0));}
+// Keep integer cents in storage/calculations. Give the model explicitly named euro amounts.
+export function euroContext(value:unknown):unknown {
+  if(Array.isArray(value))return value.map(euroContext);
+  if(value && typeof value==="object")return Object.fromEntries(Object.entries(value).map(([key,v])=>{
+    if(["ht","vat","ttc","ticket","totalHT","price"].includes(key) && (typeof v==="number" || v===null))return [key+"EUR",v===null?null:Number(v)/100];
+    return [key,euroContext(v)];
+  }));
+  return value;
+}
 export function memoryContext(items:MemoryItem[],workspace:Workspace,question:string,date:string){
   const terms=question.toLocaleLowerCase("fr").split(/\W+/).filter(t=>t.length>3);
   const valid=items.filter(i=>i.status==="validated");
   const ranked=valid.map(i=>({i,score:terms.reduce((n,t)=>n+(JSON.stringify(i).toLocaleLowerCase("fr").includes(t)?1:0),0)})).sort((a,b)=>b.score-a.score||b.i.createdAt.localeCompare(a.i.createdAt)).slice(0,20).map(v=>v.i);
   const metrics=cashMetrics(items,date);
   const selected=Array.from(new Map([...ranked,...items.filter(i=>[...metrics.sources,...metrics.referenceSources].includes(i.id))].map(i=>[i.id,i])).values());
-  return {date,metrics,documentCount:items.length,selectedDocumentCount:selected.length,documents:selected.map(i=>({id:i.id,title:i.title,kind:i.kind,payload:i.payload})),workspace};
+  return {date,amountUnit:"EUR (euros, pas centimes)",metrics:euroContext(metrics),documentCount:items.length,selectedDocumentCount:selected.length,documents:selected.map(i=>({id:i.id,title:i.title,kind:i.kind,payload:euroContext(i.payload)})),workspace:euroContext(workspace)};
 }

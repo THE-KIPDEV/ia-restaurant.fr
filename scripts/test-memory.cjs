@@ -29,6 +29,11 @@ assert(!d.workspaceSchema.safeParse(tooSmall).success,'table capacity enforced')
 const overlap=structuredClone(workspace);overlap.reservations.push({...overlap.reservations[0],id:'overlap',time:'20:15'});
 assert(!d.workspaceSchema.safeParse(overlap).success,'overlapping reservations rejected');
 assert.equal(d.recipeCost(workspace.recipes[0],workspace),925);
+const context=d.memoryContext(items,workspace,'Quel est le CA ?',date);
+assert.equal(context.metrics.ttcEUR,1746);assert.equal(context.metrics.ticketEUR,29.1);
+assert.equal(context.documents.find(i=>i.id==='demo-midi').payload.htEUR,1560);
+assert.equal(context.workspace.ingredients[0].priceEUR,3.5);
+assert(!('ttc' in context.metrics),'model context cannot expose ambiguous cent amounts');
 console.log('Domain: revenue, equivalent services, validation, units, floor capacity and recipes passed.');
 
 async function integration(){
