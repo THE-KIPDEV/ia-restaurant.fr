@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth";
-import { getStripe } from "@/lib/stripe";
+import { requireUser, hasActiveSubscription } from "@/lib/auth";
+import { getStripe, PLANS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { siteConfig } from "@/lib/config";
@@ -19,9 +19,11 @@ export async function POST(req: NextRequest) {
 
     const { priceId } = await req.json();
 
-    if (!priceId) {
+    const allowed = [PLANS.pro.stripePriceMonthly,PLANS.pro.stripePriceYearly,PLANS.business.stripePriceMonthly,PLANS.business.stripePriceYearly].filter(Boolean);
+    if (typeof priceId !== "string" || !allowed.includes(priceId)) {
       return NextResponse.json({ error: "Price ID required" }, { status: 400 });
     }
+    if(hasActiveSubscription(user)) return NextResponse.json({error:"Un abonnement est déjà actif. Gérez-le depuis le portail de facturation."},{status:409});
 
     const stripe = getStripe();
 
@@ -45,6 +47,8 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create(avecLibelle({
       customer: customerId,
       mode: "subscription",
+      // Le routeur partagé doit reconnaître aussi les renouvellements/résiliations.
+      subscription_data: { metadata: { userId: user.id, site: "ia-restaurant.fr" } },
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       // kip-pay:route : `ui_mode: custom` refuse `success_url`, `cancel_url` ET

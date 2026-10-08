@@ -17,7 +17,7 @@ export function Hero({ locale }: { locale: Locale }) {
 
   return (
     <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-28">
-      <div className="hero-gradient matrix-bg absolute inset-0" />
+      <div className="hero-gradient absolute inset-0" />
       <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-neon opacity-5 blur-[120px]" />
       <div className="absolute bottom-20 right-1/4 h-72 w-72 rounded-full bg-purple opacity-5 blur-[120px]" />
 
@@ -57,9 +57,23 @@ export function Hero({ locale }: { locale: Locale }) {
 
           <p className="mt-4 text-sm text-text-secondary">
             {locale === "fr"
-              ? "50 jetons offerts chaque mois — sans carte bancaire"
-              : "50 free tokens every month — no credit card required"}
+              ? "Démonstration interactive sans inscription"
+              : "Interactive demonstration without registration"}
           </p>
+        </div>
+
+        <div className="mx-auto mt-12 grid max-w-4xl gap-6 rounded-2xl border border-border-default bg-surface-2 p-6 sm:grid-cols-2 sm:p-8">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-neon">{locale === "fr" ? "Exemple de coût matière" : "Food cost example"}</p>
+            <h2 className="mt-3 text-xl font-semibold">{locale === "fr" ? "Un plat à 18 € HT, une matière à 5,40 €" : "A €18 dish, €5.40 in ingredients"}</h2>
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">{locale === "fr" ? "Le coût matière représente 30 % du prix HT. Il reste 12,60 € avant les autres charges : ce montant n’est pas votre bénéfice net." : "Ingredients represent 30% of the pre-tax price. €12.60 remains before other costs; this is not net profit."}</p>
+          </div>
+          <div className="rounded-xl bg-surface-0 p-5">
+            <p className="text-sm text-text-secondary">{locale === "fr" ? "Pour décider quoi retravailler" : "To choose what to improve"}</p>
+            <p className="mt-3 text-3xl font-bold text-neon">30 % <span className="text-sm font-normal text-text-secondary">{locale === "fr" ? "de coût matière" : "food cost"}</span></p>
+            <p className="mt-3 text-sm text-text-secondary">{locale === "fr" ? "Ajoutez les quantités vendues pour comparer popularité et marge de vos plats." : "Add sales quantities to compare dish popularity and margin."}</p>
+            <Link href="/seo/comment-fixer-prix-plat-restaurant" className="mt-4 inline-block text-sm font-semibold text-neon underline underline-offset-4">{locale === "fr" ? "Comprendre le calcul →" : "Understand the calculation →"}</Link>
+          </div>
         </div>
 
         {/* Feature pills */}

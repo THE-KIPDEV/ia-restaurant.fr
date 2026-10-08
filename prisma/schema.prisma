@@ -39,9 +39,11 @@ model User {
   plan Plan @default(FREE)
 
   // Tokens
-  tokenBalance    Int @default(50)
+  tokenBalance    Int @default(0)
+  purchasedTokenBalance Int @default(0)
   tokensUsedTotal Int @default(0)
   tokenResetAt    DateTime?
+  creditPeriodEnd DateTime?
 
   // Relations
   restaurants Restaurant[]
@@ -68,6 +70,8 @@ model Restaurant {
   // Relations
   dishes    Dish[]
   aiUsages  AiUsage[]
+  workspace RestaurantWorkspace?
+  memoryItems RestaurantMemoryItem[]
 
   @@map("restaurants")
 }
@@ -97,12 +101,15 @@ enum AiFeature {
   SOCIAL_POST
   TRANSLATE
   MARGIN_ANALYSIS
+  DOCUMENT_READING
+  COPILOT
 }
 
 model AiUsage {
   id           String     @id @default(cuid())
   feature      AiFeature
   tokensUsed   Int
+  purchasedTokens Int @default(0)
   inputData    String?    @db.Text
   outputData   String?    @db.Text
   userId       String
@@ -110,6 +117,8 @@ model AiUsage {
   restaurantId String?
   restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
   createdAt    DateTime   @default(now())
+  requestId    String?    @unique
+  status       String    @default("completed")
 
   @@map("ai_usages")
 }
@@ -132,4 +141,34 @@ model WaitlistEntry {
   createdAt DateTime @default(now())
 
   @@map("waitlist")
+}
+
+model RestaurantWorkspace {
+  id           String @id @default(cuid())
+  restaurantId String @unique
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  data         Json
+  revision     Int @default(0)
+  updatedAt    DateTime @updatedAt
+  @@map("restaurant_workspaces")
+}
+
+model RestaurantMemoryItem {
+  id           String @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  kind         String
+  title        String
+  status       String @default("draft")
+  payload      Json
+  history      Json @default("[]")
+  originalName String?
+  fileMime     String?
+  fileData     Bytes?
+  fingerprint  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([restaurantId, fingerprint])
+  @@index([restaurantId, status, createdAt])
+  @@map("restaurant_memory_items")
 }

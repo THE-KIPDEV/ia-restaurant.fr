@@ -1,3 +1,4 @@
+import ConsentSettings from "@/components/ConsentSettings";
 import Link from "next/link";
 import { ChefHat, ArrowUpRight } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
@@ -24,7 +25,7 @@ export function Footer({ locale }: { locale: Locale }) {
               </span>
             </Link>
             <p className="mt-3 text-sm text-text-muted leading-relaxed">
-              {t("footer.description")}
+              Toute la mémoire de votre restaurant. Un copilote pour gérer les chiffres, les documents et le quotidien.
             </p>
           </div>
 
@@ -35,12 +36,12 @@ export function Footer({ locale }: { locale: Locale }) {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link href="#features" className="text-sm text-text-muted hover:text-neon transition-colors">
+                <Link href="/features" className="text-sm text-text-muted hover:text-neon transition-colors">
                   {t("nav.features")}
                 </Link>
               </li>
               <li>
-                <Link href="#pricing" className="text-sm text-text-muted hover:text-neon transition-colors">
+                <Link href="/pricing" className="text-sm text-text-muted hover:text-neon transition-colors">
                   {t("nav.pricing")}
                 </Link>
               </li>
@@ -136,6 +137,7 @@ export function Footer({ locale }: { locale: Locale }) {
           </p>
         </div>
       </div>
+      <div className="mx-auto max-w-3xl px-6 pb-6"><ConsentSettings /></div>
     </footer>
   );
 }

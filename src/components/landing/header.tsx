@@ -40,18 +40,13 @@ export function Header({ locale }: HeaderProps) {
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
-            <Link href="#features" className="text-sm text-text-secondary hover:text-neon transition-colors">
+            <Link href="/features" className="text-sm text-text-secondary hover:text-neon transition-colors">
               {t.features}
             </Link>
-            <Link href="#pricing" className="text-sm text-text-secondary hover:text-neon transition-colors">
+            <Link href="/pricing" className="text-sm text-text-secondary hover:text-neon transition-colors">
               {t.pricing}
             </Link>
-            <Link
-              href={locale === "fr" ? "/?locale=en" : "/?locale=fr"}
-              className="text-sm text-text-muted hover:text-text-secondary transition-colors"
-            >
-              {locale === "fr" ? "EN" : "FR"}
-            </Link>
+            <Link href="/demo" className="text-sm text-text-secondary hover:text-neon transition-colors">Démo interactive</Link>
             {isSignedIn ? (
               <Link href="/dashboard" className="btn-primary text-sm">
                 {t.dashboard}
@@ -80,12 +75,13 @@ export function Header({ locale }: HeaderProps) {
         {open && (
           <div className="border-t border-border-dim py-4 md:hidden">
             <nav className="flex flex-col gap-3">
-              <Link href="#features" onClick={() => setOpen(false)} className="text-sm text-text-secondary hover:text-neon px-2 py-1">
+              <Link href="/features" onClick={() => setOpen(false)} className="text-sm text-text-secondary hover:text-neon px-2 py-1">
                 {t.features}
               </Link>
-              <Link href="#pricing" onClick={() => setOpen(false)} className="text-sm text-text-secondary hover:text-neon px-2 py-1">
+              <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm text-text-secondary hover:text-neon px-2 py-1">
                 {t.pricing}
               </Link>
+              <Link href="/demo" onClick={()=>setOpen(false)} className="text-sm px-2 py-1">Démo interactive</Link>
               {isSignedIn ? (
                 <Link href="/dashboard" className="btn-primary text-sm text-center">
                   {t.dashboard}

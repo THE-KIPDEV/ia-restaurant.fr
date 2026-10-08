@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "https://ia-restaurant.fr/legal" },
   title: "Mentions légales",
   description: "Mentions légales d'IA Restaurant — ia-restaurant.fr",
 };

@@ -1,7 +1,13 @@
 // Funnel event tracking — voir KIPSTATS-EVENTS.md à la racine du monorepo.
 type EventData = Record<string, unknown>;
 
+function measurementAllowed(): boolean {
+  const consent = (window as unknown as { Consent?: { get: () => { choices?: { mesure?: boolean } } } }).Consent;
+  return consent?.get().choices?.mesure === true;
+}
+
 function fire(name: string, data: EventData): boolean {
+  if (!measurementAllowed()) return false;
   const k = (window as { kipstats?: { event?: (n: string, d: EventData) => void } }).kipstats;
   if (k && typeof k.event === "function") {
     k.event(name, data);
@@ -22,11 +28,11 @@ function fire(name: string, data: EventData): boolean {
  * rien ne change : le tracker est déjà prêt.
  */
 export function track(name: string, data: EventData = {}) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !measurementAllowed()) return;
   if (fire(name, data)) return;
   let tries = 0;
   const retry = () => {
-    if (fire(name, data) || tries++ > 40) return; // ~10 s de rattrapage, puis on renonce
+    if (!measurementAllowed() || fire(name, data) || tries++ > 40) return; // ~10 s de rattrapage, puis on renonce
     setTimeout(retry, 250);
   };
   const ric = (window as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;

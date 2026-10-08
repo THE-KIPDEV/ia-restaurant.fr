@@ -11,6 +11,8 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Jetons" };
 
 const featureLabels: Record<string, { fr: string; en: string }> = {
+  DOCUMENT_READING: {fr:"Lecture de document",en:"Document reading"},
+  COPILOT: {fr:"Copilote de gestion",en:"Management copilot"},
   MENU_ANALYSIS: { fr: "Menu Engineering", en: "Menu Engineering" },
   DISH_DESCRIPTION: { fr: "Descriptions IA", en: "AI Descriptions" },
   REVIEW_RESPONSE: { fr: "Réponses avis", en: "Review Responses" },
@@ -29,17 +31,17 @@ export default async function TokensPage({
   const { success } = await searchParams;
   const plan = getUserPlan(user);
   const planKey = plan.toLowerCase() as PlanKey;
-  const tokenMax = PLANS[planKey]?.tokens ?? 50;
+  const tokenMax = PLANS[planKey]?.tokens ?? 0;
   const stats = await getUsageStats(user.id);
   const tokenPercent = tokenMax > 0 ? Math.min((user.tokenBalance / tokenMax) * 100, 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-10">
       {success === "true" && <PurchaseSignal plan="tokens" amount={null} />}
       <div>
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Coins className="h-6 w-6 text-neon" />
-          <span className="gradient-text">{locale === "fr" ? "Jetons" : "Tokens"}</span>
+          <span className="gradient-text">{locale === "fr" ? "Crédits IA" : "AI credits"}</span>
         </h1>
       </div>
 
@@ -49,7 +51,7 @@ export default async function TokensPage({
           <div>
             <p className="text-sm text-text-muted">{locale === "fr" ? "Solde actuel" : "Current Balance"}</p>
             <p className="mt-1 text-4xl font-extrabold neon-text">{user.tokenBalance.toLocaleString()}</p>
-            <p className="mt-1 text-sm text-text-muted">/ {tokenMax.toLocaleString()} {locale === "fr" ? "ce mois" : "this month"}</p>
+            <p className="mt-1 text-sm text-text-muted">Allocation mensuelle : {tokenMax.toLocaleString()} {locale === "fr" ? "ce mois" : "this month"}</p>
           </div>
           <Zap className="h-16 w-16 text-neon opacity-20" />
         </div>
@@ -63,15 +65,16 @@ export default async function TokensPage({
         )}
       </div>
 
+      <p className="text-sm text-text-secondary">Crédits achetés conservés : {user.purchasedTokenBalance.toLocaleString("fr-FR")}. Lecture : 12 crédits · copilote : 5 crédits · gestion manuelle : 0 crédit.</p>
       {/* Token Packs */}
       <div>
         <h2 className="mb-4 text-lg font-semibold text-text-primary">
-          {locale === "fr" ? "Acheter des jetons supplémentaires" : "Buy Extra Tokens"}
+          {locale === "fr" ? "Ajouter des crédits IA" : "Buy Extra Tokens"}
         </h2>
-        <TokenPacks
+        {plan!=="FREE"?<TokenPacks
           locale={locale}
           packs={TOKEN_PACKS.map((p) => ({ amount: p.amount, price: p.price, popular: p.popular }))}
-        />
+        />:<p>Activez votre abonnement pour utiliser ou ajouter des crédits IA.</p>}
       </div>
 
       {/* Usage Stats */}
@@ -89,7 +92,7 @@ export default async function TokensPage({
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-text-muted">{item._count}x</span>
-                  <span className="text-sm font-medium text-neon">{item._sum.tokensUsed} tokens</span>
+                  <span className="text-sm font-medium text-neon">{item._sum.tokensUsed} crédits</span>
                 </div>
               </div>
             ))}

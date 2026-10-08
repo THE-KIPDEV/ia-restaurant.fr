@@ -25,8 +25,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Le bundle standalone ne trace pas toujours le moteur de requête Prisma → on le copie.
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/migrate-memory.cjs ./scripts/migrate-memory.cjs
 USER nextjs
 EXPOSE 8080
 ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "node scripts/migrate-memory.cjs && node server.js"]

@@ -2,25 +2,25 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-neon: #00f5ff;
-  --color-neon-dim: #00c4cc;
+  --color-neon: #2e674f;
+  --color-neon-dim: #24533e;
   --color-neon-glow: rgba(0, 245, 255, 0.15);
   --color-neon-glow-strong: rgba(0, 245, 255, 0.3);
   --color-purple: #7c3aed;
   --color-purple-dim: #6d28d9;
   --color-purple-glow: rgba(124, 58, 237, 0.15);
-  --color-surface-0: #000000;
-  --color-surface-1: #07070e;
-  --color-surface-2: #0f0f1a;
-  --color-surface-3: #161625;
-  --color-surface-4: #1e1e32;
-  --color-surface-5: #28283f;
-  --color-border-dim: #1a1a2e;
-  --color-border-default: #2a2a40;
-  --color-border-bright: #3a3a55;
-  --color-text-primary: #f0f0f8;
-  --color-text-secondary: #a0a0b8;
-  --color-text-muted: #6a6a82;
+  --color-surface-0: #f6f5f0;
+  --color-surface-1: #f0f1e9;
+  --color-surface-2: #ffffff;
+  --color-surface-3: #f4f5ee;
+  --color-surface-4: #e8eddf;
+  --color-surface-5: #dce5d4;
+  --color-border-dim: #e1e5da;
+  --color-border-default: #cfd8c7;
+  --color-border-bright: #b3c2a8;
+  --color-text-primary: #263026;
+  --color-text-secondary: #59634f;
+  --color-text-muted: #677060;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
@@ -367,3 +367,7 @@
     50% { opacity: 0.7; }
   }
 }
+
+:focus-visible { outline:3px solid var(--color-neon); outline-offset:4px; }
+section[id] { scroll-margin-top:6rem; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }

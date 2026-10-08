@@ -14,7 +14,6 @@ export function Pricing({ locale }: { locale: Locale }) {
   const t = createT(locale);
 
   const plans = [
-    { key: "free" as const, plan: PLANS.free, popular: false },
     { key: "pro" as const, plan: PLANS.pro, popular: true },
     { key: "business" as const, plan: PLANS.business, popular: false },
   ];
@@ -83,7 +82,7 @@ export function Pricing({ locale }: { locale: Locale }) {
 
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold text-text-primary">
-                    {price === 0 ? t("pricing.free") : formatPrice(price)}
+                    {formatPrice(price)}
                   </span>
                   {price > 0 && (
                     <span className="text-sm text-text-muted">{period}</span>
@@ -107,7 +106,7 @@ export function Pricing({ locale }: { locale: Locale }) {
                 </ul>
 
                 <Link
-                  href={key === "free" ? "/sign-up" : "/sign-up"}
+                  href="/sign-up"
                   onClick={() => track("cta_click", { cta: `pricing_${key}` })}
                   className={`mt-8 block w-full rounded-lg py-2.5 text-center text-sm font-semibold transition-all ${
                     popular
@@ -115,7 +114,7 @@ export function Pricing({ locale }: { locale: Locale }) {
                       : "btn-secondary"
                   }`}
                 >
-                  {key === "free" ? t("hero.cta") : t("pricing.upgrade")}
+                  {t("pricing.upgrade")}
                 </Link>
               </div>
             );

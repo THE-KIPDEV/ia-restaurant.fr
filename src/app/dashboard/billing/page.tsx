@@ -22,7 +22,7 @@ export default async function BillingPage({
   const purchasedPlan = plan.toLowerCase();
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6 px-6 py-10">
       {success === "true" && purchasedPlan !== "free" && (
         <PurchaseSignal plan={purchasedPlan} amount={PLAN_PRICE_CENTS[purchasedPlan] ?? null} />
       )}
@@ -38,7 +38,7 @@ export default async function BillingPage({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-text-muted">{locale === "fr" ? "Plan actuel" : "Current Plan"}</p>
-            <p className="mt-1 text-2xl font-bold text-text-primary">{plan}</p>
+            <p className="mt-1 text-2xl font-bold text-text-primary">{plan==="FREE"?"Abonnement à activer":plan}</p>
             {user.stripeCurrentPeriodEnd && (
               <p className="mt-1 text-sm text-text-muted">
                 {locale === "fr" ? "Renouvellement :" : "Renews:"} {formatDate(user.stripeCurrentPeriodEnd)}
@@ -57,8 +57,10 @@ export default async function BillingPage({
       </div>
 
       {/* Plans */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        {(["free", "pro", "business"] as const).map((key) => {
+      <p className="text-sm text-text-secondary">La démonstration publique utilise des exemples préparés. Activez votre abonnement avant d’utiliser l’IA avec les données de votre restaurant.</p>
+      {success==="true"&&plan==="FREE"&&<p role="status" className="rounded-lg bg-surface-4 p-4 text-sm">Le paiement est en cours de confirmation. Rechargez cette page dans quelques instants pour ouvrir votre espace.</p>}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {(["pro", "business"] as const).map((key) => {
           const p = PLANS[key];
           const isCurrent = plan === key.toUpperCase();
           return (
@@ -67,7 +69,7 @@ export default async function BillingPage({
                 {locale === "fr" ? p.nameFr : p.name}
               </h3>
               <p className="mt-2 text-3xl font-extrabold text-text-primary">
-                {p.price.monthly === 0 ? (locale === "fr" ? "Gratuit" : "Free") : formatPrice(p.price.monthly)}
+                {formatPrice(p.price.monthly)}
                 {p.price.monthly > 0 && <span className="text-sm text-text-muted font-normal">/mois</span>}
               </p>
               <ul className="mt-4 space-y-2">
@@ -82,13 +84,13 @@ export default async function BillingPage({
                 <div className="mt-4 rounded-lg bg-neon-glow py-2 text-center text-sm font-medium text-neon">
                   {locale === "fr" ? "Plan actuel" : "Current Plan"}
                 </div>
-              ) : key !== "free" ? (
+              ) : plan === "FREE" ? (
                 <SubscribeButton
                   plan={key}
                   priceId={key === "pro" ? PLANS.pro.stripePriceMonthly : PLANS.business.stripePriceMonthly}
                   label={locale === "fr" ? "Souscrire" : "Subscribe"}
                 />
-              ) : null}
+              ) : <p className="mt-4 text-sm text-text-muted">Modifiez votre offre depuis « Gérer l’abonnement ».</p>}
             </div>
           );
         })}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { siteConfig } from "@/lib/config";
 import "@/styles/globals.css";
+import "@/styles/memory.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -43,10 +44,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className="dark">
+    <html lang="fr">
       <head>
+        <script src="https://orbeconsent.com/c/006f3daae259c24f.js" />
         <script
-          defer
+          suppressHydrationWarning
+          type="text/plain"
+          data-consent="mesure"
           src="https://kipstats.com/tracker.js"
           data-site="kp_edd03c1b"
         />
@@ -64,7 +68,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-surface-0 text-text-primary antialiased">
         {children}
         <Toaster
-          theme="dark"
+          theme="light"
           position="bottom-right"
           toastOptions={{
             style: {

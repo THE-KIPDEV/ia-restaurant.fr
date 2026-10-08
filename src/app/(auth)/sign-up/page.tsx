@@ -29,7 +29,7 @@ export default function SignUpPage() {
         return;
       }
       track("signup", {});
-      window.location.href = "/dashboard";
+      window.location.href = "/dashboard/billing";
     } catch {
       setError("Une erreur est survenue.");
       setLoading(false);

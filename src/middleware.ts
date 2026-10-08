@@ -3,13 +3,14 @@ import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "change-me-in-production-ia-restaurant"
+  process.env.JWT_SECRET || (process.env.NODE_ENV === "production" ? "" : "local-development-ia-restaurant")
 );
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/admin",
   "/api/ai",
+  "/api/memory",
   "/api/stripe",
   "/api/restaurants",
   "/api/tokens",
@@ -19,7 +20,8 @@ async function isAuthenticated(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get("token")?.value;
   if (!token) return false;
   try {
-    await jwtVerify(token, JWT_SECRET);
+    if (!JWT_SECRET.length) return false;
+    await jwtVerify(token, JWT_SECRET, { algorithms: ["HS256"] });
     return true;
   } catch {
     return false;

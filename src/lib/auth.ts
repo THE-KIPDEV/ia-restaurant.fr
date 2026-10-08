@@ -4,23 +4,25 @@ import { prisma } from "./prisma";
 import { resetMonthlyTokens } from "./tokens";
 import type { Plan, User } from "@prisma/client";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "change-me-in-production-ia-restaurant"
-);
+function jwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === "production") throw new Error("JWT_SECRET is required");
+  return new TextEncoder().encode(secret || "local-development-ia-restaurant");
+}
 
 export async function createToken(userId: string): Promise<string> {
   return new SignJWT({ userId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
-    .sign(JWT_SECRET);
+    .sign(jwtSecret());
 }
 
 export async function verifyToken(
   token: string
 ): Promise<{ userId: string } | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, jwtSecret(), { algorithms: ["HS256"] });
     return payload as { userId: string };
   } catch {
     return null;

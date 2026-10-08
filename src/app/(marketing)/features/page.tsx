@@ -1,18 +1,4 @@
-import { Features } from "@/components/landing/features";
-import { getLocale } from "@/lib/i18n";
 import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Fonctionnalités — 6 Outils IA pour Restaurateurs",
-  description: "Menu engineering, descriptions de plats, réponses aux avis, posts réseaux sociaux, traduction de carte et analyse des marges — tout propulsé par l'IA Claude.",
-};
-
-export default async function FeaturesPage() {
-  const locale = await getLocale();
-
-  return (
-    <div className="pt-16">
-      <Features locale={locale} />
-    </div>
-  );
-}
+import { MemoryLanding } from "@/components/memory/landing";
+export const metadata:Metadata={title:"La mémoire et le copilote de votre restaurant",description:"Relevés de caisse, CA, factures, couverts, salle, recettes et équipe : découvrez IA Restaurant.",alternates:{canonical:"https://ia-restaurant.fr/features"}};
+export default function Page(){return <MemoryLanding focus="features"/>;}

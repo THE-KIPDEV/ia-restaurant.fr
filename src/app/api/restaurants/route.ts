@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser, getUserPlan } from "@/lib/auth";
+import { requireUser, getUserPlan, hasActiveSubscription } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PLANS, type PlanKey } from "@/lib/stripe";
 
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await requireUser();
     const plan = getUserPlan(user);
+    if (!hasActiveSubscription(user)) return NextResponse.json({error:"Activez votre abonnement pour créer la mémoire de votre restaurant."},{status:402});
     const planKey = plan.toLowerCase() as PlanKey;
     const maxRestaurants = PLANS[planKey]?.restaurants ?? 1;
 

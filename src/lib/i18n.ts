@@ -7,23 +7,23 @@ const translations = {
   "nav.dashboard": { fr: "Tableau de bord", en: "Dashboard" },
   "nav.signIn": { fr: "Connexion", en: "Sign In" },
   "nav.signUp": { fr: "Inscription", en: "Sign Up" },
-  "nav.getStarted": { fr: "Commencer gratuitement", en: "Get Started Free" },
+  "nav.getStarted": { fr: "Activer mon copilote", en: "Activate my copilot" },
 
   // Hero
-  "hero.badge": { fr: "Propulsé par l'IA Claude", en: "Powered by Claude AI" },
+  "hero.badge": { fr: "Des outils pour votre quotidien en restaurant", en: "Powered by Claude AI" },
   "hero.title": {
-    fr: "L'intelligence artificielle au service de votre restaurant",
+    fr: "L’IA pour votre restaurant : carte, marges et avis",
     en: "AI-Powered Intelligence for Your Restaurant",
   },
   "hero.subtitle": {
-    fr: "Analysez vos marges, optimisez votre carte, générez des descriptions irrésistibles et répondez aux avis — le tout propulsé par l'IA.",
+    fr: "Repérez les plats à retravailler, rédigez votre carte et préparez vos réponses aux avis. Six outils pour passer de vos données à une première proposition, à vérifier avant publication.",
     en: "Analyze margins, optimize your menu, generate irresistible descriptions and respond to reviews — all powered by AI.",
   },
-  "hero.cta": { fr: "Essayer gratuitement", en: "Try Free" },
+  "hero.cta": { fr: "Découvrir la démonstration", en: "Explore the demo" },
   "hero.cta2": { fr: "Voir les fonctionnalités", en: "See Features" },
   "hero.trustedBy": {
-    fr: "Déjà adopté par +500 restaurateurs",
-    en: "Already trusted by 500+ restaurant owners",
+    fr: "Vos documents, vos chiffres, votre mémoire",
+    en: "Your documents, your numbers, your memory",
   },
 
   // Features
@@ -81,8 +81,8 @@ const translations = {
   // Pricing
   "pricing.title": { fr: "Tarifs simples et transparents", en: "Simple, Transparent Pricing" },
   "pricing.subtitle": {
-    fr: "Commencez gratuitement. Montez en puissance quand vous êtes prêt.",
-    en: "Start free. Scale up when you're ready.",
+    fr: "Explorez les exemples préparés, puis activez votre abonnement.",
+    en: "Explore prepared examples, then activate your subscription.",
   },
   "pricing.monthly": { fr: "Mensuel", en: "Monthly" },
   "pricing.yearly": { fr: "Annuel", en: "Yearly" },
@@ -168,8 +168,8 @@ const translations = {
     en: "Can I try it for free?",
   },
   "faq.a3": {
-    fr: "Oui ! Le plan gratuit inclut 50 jetons par mois, suffisant pour tester toutes les fonctionnalités.",
-    en: "Yes! The free plan includes 50 tokens per month, enough to test all features.",
+    fr: "La démonstration est accessible sans inscription, avec des données fictives et des réponses préparées. Le copilote réel nécessite un abonnement.",
+    en: "The demonstration is available without registration using fictional data and prepared answers. The real copilot requires a subscription.",
   },
   "faq.q4": {
     fr: "Mes données sont-elles sécurisées ?",

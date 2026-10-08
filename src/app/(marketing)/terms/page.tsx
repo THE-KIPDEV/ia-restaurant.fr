@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "https://ia-restaurant.fr/terms" },
   title: "Conditions d'utilisation",
   description: "Conditions d'utilisation d'IA Restaurant — ia-restaurant.fr",
 };
@@ -9,7 +10,7 @@ export default function TermsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-32 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold gradient-text">Conditions d&apos;utilisation</h1>
-      <p className="mt-2 text-sm text-text-muted">Dernière mise à jour : mars 2026</p>
+      <p className="mt-2 text-sm text-text-muted">Dernière mise à jour : 8 octobre 2026</p>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-text-secondary">
         <section>
@@ -19,17 +20,17 @@ export default function TermsPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-text-primary">2. Description du service</h2>
-          <p>IA Restaurant est une plateforme SaaS qui utilise l&apos;intelligence artificielle pour aider les restaurateurs à optimiser leur carte, analyser leurs marges, générer des descriptions de plats, répondre aux avis clients et créer du contenu pour les réseaux sociaux.</p>
+          <p>IA Restaurant conserve les documents, chiffres, plans de salle, réservations, recettes et consignes du restaurant. Un copilote IA peut analyser les données confirmées. Le restaurateur vérifie les extractions avant validation. Cette version permet la saisie et le dépôt de documents ; elle ne synchronise pas automatiquement un logiciel de caisse.</p>
         </section>
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-text-primary">3. Inscription</h2>
-          <p>L&apos;inscription est gratuite et donne accès au plan Free (50 jetons/mois). L&apos;utilisateur s&apos;engage à fournir des informations exactes.</p>
+          <p>La démonstration publique utilise des données fictives et des réponses préparées, sans appel IA. La création du compte est gratuite ; un abonnement actif est nécessaire pour créer son espace et utiliser l&apos;IA. L&apos;utilisateur s&apos;engage à fournir des informations exactes.</p>
         </section>
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-text-primary">4. Jetons et abonnements</h2>
-          <p>Chaque action IA consomme un nombre défini de jetons. Les jetons mensuels sont renouvelés à chaque cycle de facturation. Les jetons achetés en pack n&apos;expirent pas. Les abonnements sont sans engagement et peuvent être annulés à tout moment.</p>
+          <p>Le coût est indiqué avant l&apos;action : 12 crédits pour lire un document, 5 pour une réponse du copilote. Les erreurs techniques restituent les crédits. La saisie manuelle et la consultation ne consomment aucun crédit. L&apos;allocation incluse est renouvelée chaque mois et ne se cumule pas. Les crédits achetés sont conservés ; leur utilisation nécessite un abonnement actif. L&apos;abonnement peut être annulé depuis la facturation. La mémoire déjà créée reste consultable et exportable après la fin de l&apos;abonnement.</p>
         </section>
 
         <section>

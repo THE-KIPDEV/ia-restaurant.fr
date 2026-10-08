@@ -44,8 +44,8 @@ export async function POST(request: Request) {
 
     // tokenResetAt = first day of next month at 00:00
     const tokenResetAt = new Date();
-    tokenResetAt.setMonth(tokenResetAt.getMonth() + 1);
     tokenResetAt.setDate(1);
+    tokenResetAt.setMonth(tokenResetAt.getMonth() + 1);
     tokenResetAt.setHours(0, 0, 0, 0);
 
     const user = await prisma.user.create({
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
-        tokenBalance: 50,
+        tokenBalance: 0,
         tokenResetAt,
       },
     });

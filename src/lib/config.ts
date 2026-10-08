@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "IA Restaurant",
-  description: "AI-powered restaurant management platform",
-  descriptionFr: "Plateforme IA pour la gestion de restaurant",
+  description: "Your restaurant memory and management copilot",
+  descriptionFr: "Toute la mémoire de votre restaurant et un copilote pour le gérer : relevés de caisse, chiffre d’affaires, factures, couverts, salle et recettes. Démonstration interactive sans inscription.",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://ia-restaurant.fr",
   domain: "ia-restaurant.fr",
   locale: "fr",
@@ -28,6 +28,8 @@ export const TOKEN_COSTS = {
   SOCIAL_POST: 5,
   TRANSLATE: 10,
   MARGIN_ANALYSIS: 20,
+  DOCUMENT_READING: 12,
+  COPILOT: 5,
 } as const;
 
 export type AiFeatureKey = keyof typeof TOKEN_COSTS;

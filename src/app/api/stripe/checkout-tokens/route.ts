@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth";
+import { requireUser, hasActiveSubscription } from "@/lib/auth";
 import { getStripe, TOKEN_PACKS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
   const kipIntegre = req.headers.get("x-kip-pay") === "inline";
   try {
     const user = await requireUser();
+    if(!hasActiveSubscription(user))return NextResponse.json({error:"Activez votre abonnement avant d’ajouter des crédits IA."},{status:402});
 
     const rl = rateLimit(`stripe:tokens:${user.id}`, 5, 60_000);
     if (!rl.success) {

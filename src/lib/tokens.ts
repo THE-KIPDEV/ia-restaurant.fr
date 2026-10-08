@@ -1,7 +1,22 @@
 import { prisma } from "./prisma";
 import { TOKEN_COSTS, type AiFeatureKey } from "./config";
 import { PLANS, type PlanKey } from "./stripe";
-import type { AiFeature } from "@prisma/client";
+import { Prisma, type AiFeature } from "@prisma/client";
+
+// Lock the balance for every mutation: monthly credits are spent before purchased credits.
+export async function debitCredits(tx: Prisma.TransactionClient, userId: string, cost: number) {
+  const rows = await tx.$queryRaw<Array<{tokenBalance:number;purchasedTokenBalance:number}>>`
+    SELECT "tokenBalance", "purchasedTokenBalance" FROM "users" WHERE id=${userId} FOR UPDATE`;
+  const user=rows[0];
+  if(!user || user.tokenBalance<cost) return null;
+  const purchasedUsed=Math.max(0,cost-(user.tokenBalance-user.purchasedTokenBalance));
+  await tx.user.update({where:{id:userId},data:{tokenBalance:{decrement:cost},purchasedTokenBalance:{decrement:purchasedUsed},tokensUsedTotal:{increment:cost}}});
+  return {purchasedUsed,remaining:user.tokenBalance-cost};
+}
+export function nextCreditMonth(date: Date) {
+  const next=new Date(date);const day=next.getUTCDate();next.setUTCDate(1);next.setUTCMonth(next.getUTCMonth()+1);
+  const last=new Date(Date.UTC(next.getUTCFullYear(),next.getUTCMonth()+1,0)).getUTCDate();next.setUTCDate(Math.min(day,last));return next;
+}
 
 export async function getTokenBalance(userId: string): Promise<number> {
   const user = await prisma.user.findUnique({
@@ -15,8 +30,8 @@ export async function hasEnoughTokens(
   userId: string,
   feature: AiFeatureKey
 ): Promise<boolean> {
-  const balance = await getTokenBalance(userId);
-  return balance >= TOKEN_COSTS[feature];
+  const user = await prisma.user.findUnique({where:{id:userId},select:{tokenBalance:true,plan:true,stripeCurrentPeriodEnd:true}});
+  return !!user && user.plan !== "FREE" && !!user.stripeCurrentPeriodEnd && user.stripeCurrentPeriodEnd > new Date() && user.tokenBalance >= TOKEN_COSTS[feature];
 }
 
 export async function consumeTokens(
@@ -36,27 +51,24 @@ export async function consumeTokens(
     return { success: false, remaining: user?.tokenBalance ?? 0 };
   }
 
-  const [updatedUser] = await prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
-      data: {
-        tokenBalance: { decrement: cost },
-        tokensUsedTotal: { increment: cost },
-      },
-    }),
-    prisma.aiUsage.create({
+  const updatedUser = await prisma.$transaction(async tx => {
+    const debit = await debitCredits(tx,userId,cost);
+    if (!debit) return null;
+    await tx.aiUsage.create({
       data: {
         feature: feature as AiFeature,
         tokensUsed: cost,
+        purchasedTokens: debit.purchasedUsed,
         inputData: inputData ? inputData.slice(0, 2000) : null,
         outputData: outputData ? outputData.slice(0, 2000) : null,
         userId,
         restaurantId: restaurantId || null,
       },
-    }),
-  ]);
+    });
+    return tx.user.findUniqueOrThrow({where:{id:userId},select:{tokenBalance:true}});
+  });
 
-  return { success: true, remaining: updatedUser.tokenBalance };
+  return { success: !!updatedUser, remaining: updatedUser?.tokenBalance ?? 0 };
 }
 
 export async function addTokens(
@@ -65,38 +77,22 @@ export async function addTokens(
 ): Promise<number> {
   const user = await prisma.user.update({
     where: { id: userId },
-    data: { tokenBalance: { increment: amount } },
+    data: { tokenBalance: { increment: amount }, purchasedTokenBalance: { increment: amount } },
   });
   return user.tokenBalance;
 }
 
 export async function resetMonthlyTokens(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { plan: true, tokenResetAt: true },
-  });
-
-  if (!user) return;
-
-  const now = new Date();
-  const resetAt = user.tokenResetAt;
-
-  if (resetAt && resetAt > now) return;
-
-  const planKey = user.plan.toLowerCase() as PlanKey;
-  const monthlyTokens = PLANS[planKey]?.tokens ?? 50;
-
-  const nextReset = new Date(now);
-  nextReset.setMonth(nextReset.getMonth() + 1);
-  nextReset.setDate(1);
-  nextReset.setHours(0, 0, 0, 0);
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      tokenBalance: monthlyTokens,
-      tokenResetAt: nextReset,
-    },
+  await prisma.$transaction(async tx=>{
+    await tx.$queryRaw`SELECT id FROM users WHERE id=${userId} FOR UPDATE`;
+    const user=await tx.user.findUnique({where:{id:userId}});if(!user) return;
+    const now=new Date();if(user.tokenResetAt && user.tokenResetAt>now)return;
+    const active=user.plan!=="FREE" && !!user.stripeCurrentPeriodEnd && user.stripeCurrentPeriodEnd>now;
+    const monthly=active ? PLANS[user.plan.toLowerCase() as PlanKey].tokens : 0;
+    let next=user.tokenResetAt || now;
+    do {next=nextCreditMonth(next);}while(next<=now);
+    if(active && user.stripeCurrentPeriodEnd && user.stripeCurrentPeriodEnd<next)next=user.stripeCurrentPeriodEnd;
+    await tx.user.update({where:{id:userId},data:{tokenBalance:user.purchasedTokenBalance+monthly,tokenResetAt:next}});
   });
 }
 
