@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-32 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold gradient-text">Politique de confidentialité</h1>
-      <p className="mt-2 text-sm text-text-muted">Dernière mise à jour : 8 octobre 2026</p>
+      <p className="mt-2 text-sm text-text-muted">Dernière mise à jour : 20 octobre 2026</p>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-text-secondary">
         <section>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-text-primary">7. Cookies</h2>
-          <p>Les cookies de connexion et de langue assurent le fonctionnement du service. Orbe+ conserve votre choix de consentement. KipStats mesure les visites uniquement avec votre accord. Vous pouvez refuser cette mesure et modifier votre choix via « Gérer mes cookies » en pied de page.</p>
+          <p>Les cookies de connexion et de langue assurent le fonctionnement du service. Orbe+ conserve votre choix de consentement. KipStats est un outil de mesure d’audience sans cookie exploité par KIPDEV, utilisé pour la seule mesure de la fréquentation du site et la production de statistiques anonymes. Il reçoit l’adresse de la page, le site de provenance, la taille d’écran, la langue du navigateur et, comme tout serveur, l’adresse IP, qui n’est pas conservée (seule une empreinte renouvelée chaque jour et propre à ce site est utilisée). Ces données ne sont ni croisées avec d’autres traitements ni transmises à des tiers, et sont conservées 25 mois au plus. Conformément à la délibération CNIL n° 2020-091, cette mesure est exemptée de consentement. Vous pouvez vous y opposer à tout moment avec ce lien : <a href="/?kp_ignore=1">désactiver la mesure d’audience</a> (il pose une marque dans votre navigateur qui coupe toute mesure sur ce site ; <code>?kp_ignore=0</code> la retire). Vous pouvez modifier vos choix de consentement via « Gérer mes cookies » en pied de page.</p>
         </section>
 
         <section>
