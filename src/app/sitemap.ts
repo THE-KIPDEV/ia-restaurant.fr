@@ -5,7 +5,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = siteConfig.url;
 
   const staticPages = [
-    { url: baseUrl, lastModified: new Date("2026-10-08"), changeFrequency: "weekly" as const, priority: 1.0 },
+    { url: baseUrl, lastModified: new Date("2026-10-26"), changeFrequency: "weekly" as const, priority: 1.0 },
+    { url: `${baseUrl}/guides/chantage-avis-google-restaurant`, lastModified: new Date("2026-10-26"), changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${baseUrl}/pricing`, changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${baseUrl}/features`, changeFrequency: "monthly" as const, priority: 0.9 },
     // Comparatif des formations IA restauration : tarifs et plafonds de financement datés,
