@@ -57,6 +57,7 @@ const TEXTES = {
   erreurSession:
     "Impossible de préparer le paiement. Rechargez la page ; si cela recommence, écrivez-nous.",
   rassurance: "Paiement sécurisé par Stripe. Votre carte n'est jamais vue par ce site.",
+  rappel: "Si le paiement n'aboutit pas, vous recevrez au plus un rappel à cette adresse.",
 };
 
 
@@ -84,6 +85,7 @@ const LANGUES = {
     erreurCharge: "The payment form could not load. Reload the page; if it happens again, write to us.",
     erreurSession: "The payment could not be prepared. Reload the page; if it happens again, write to us.",
     rassurance: "Payment secured by Stripe. This site never sees your card.",
+    rappel: "If the payment does not go through, you will get at most one reminder at this address.",
   },
   pl: {
     payer: "Zapłać", patienter: "Chwileczkę…", encours: "Przetwarzanie…",
@@ -97,6 +99,7 @@ const LANGUES = {
     erreurCharge: "Formularz płatności nie mógł się załadować. Odśwież stronę; jeśli to się powtórzy, napisz do nas.",
     erreurSession: "Nie udało się przygotować płatności. Odśwież stronę; jeśli to się powtórzy, napisz do nas.",
     rassurance: "Płatność zabezpieczona przez Stripe. Ta strona nigdy nie widzi Twojej karty.",
+    rappel: "Jeśli płatność nie dojdzie do skutku, otrzymasz na ten adres najwyżej jedno przypomnienie.",
   },
   it: {
     payer: "Paga", patienter: "Un momento…", encours: "Pagamento in corso…",
@@ -110,6 +113,7 @@ const LANGUES = {
     erreurCharge: "Il modulo di pagamento non si è caricato. Ricarica la pagina; se succede ancora, scrivici.",
     erreurSession: "Impossibile preparare il pagamento. Ricarica la pagina; se succede ancora, scrivici.",
     rassurance: "Pagamento protetto da Stripe. Questo sito non vede mai la tua carta.",
+    rappel: "Se il pagamento non va a buon fine, riceverai al massimo un promemoria a questo indirizzo.",
   },
   es: {
     payer: "Pagar", patienter: "Un momento…", encours: "Procesando…",
@@ -123,6 +127,7 @@ const LANGUES = {
     erreurCharge: "El formulario de pago no se ha podido cargar. Recarga la página; si vuelve a ocurrir, escríbenos.",
     erreurSession: "No se ha podido preparar el pago. Recarga la página; si vuelve a ocurrir, escríbenos.",
     rassurance: "Pago protegido por Stripe. Este sitio nunca ve tu tarjeta.",
+    rappel: "Si el pago no se completa, recibirás como máximo un recordatorio en esta dirección.",
   },
 };
 
@@ -131,6 +136,20 @@ function languePage(o) {
   const l = (document.documentElement.getAttribute("lang") || "").slice(0, 2).toLowerCase();
   return LANGUES[l] ? l : "fr";
 }
+
+/**
+ * Relance des paniers : l'adresse saisie part au récepteur du parc.
+ *
+ * 🚨 Stripe ne rend JAMAIS l'adresse d'une session intégrée qui n'a pas abouti — ni
+ *    `customer_email`, ni `customer_details`, même après `updateEmail`, même expirée
+ *    (vérifié en live le 31/10/2026). Sans cet envoi, la relance n'a personne à qui
+ *    écrire : 51 paniers sur 158 en une semaine, aucune relance possible.
+ *    Le récepteur ne croit rien sur parole : la relance ne s'en sert que si la session
+ *    existe chez Stripe, a expiré sans paiement et appartient au même site.
+ *    `relance: false` dans les options coupe l'envoi et la mention.
+ */
+const RECEPTEUR_PANIER = "https://routines.kipdev.io/panier";
+const ADRESSE_VALIDE = /^[^@\s<>"']{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
 
 const INTERVALLES = { month: "par mois", year: "par an", week: "par semaine", day: "par jour" };
 
@@ -331,7 +350,25 @@ export async function mountKipPay(container, o) {
     bouton.disabled = !s.canConfirm;
   };
   peindre(actions.getSession());
-  checkout.on("change", peindre);
+
+  // Voir RECEPTEUR_PANIER. Une seule fois par adresse, sans jamais gêner le paiement.
+  let idSession = null;
+  let adresseNotee = "";
+  clientSecret.then((cs) => { idSession = String(cs).split("_secret_")[0]; }).catch(() => {});
+  const noterAdresse = (s) => {
+    const e = s && typeof s.email === "string" ? s.email.trim() : "";
+    if (o.relance === false || !idSession || !e || e === adresseNotee || !ADRESSE_VALIDE.test(e)) return;
+    adresseNotee = e;
+    try {
+      // text/plain : pas de pré-vol CORS, keepalive : part même si l'onglet se ferme.
+      fetch(o.recepteurPanier || RECEPTEUR_PANIER, {
+        method: "POST", mode: "cors", keepalive: true, credentials: "omit",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ s: idSession, e, d: location.hostname, l: languePage(o) }),
+      }).catch(() => {});
+    } catch { /* jamais bloquant */ }
+  };
+  checkout.on("change", (s) => { peindre(s); noterAdresse(s); });
 
   if (o.codePromo !== false) branchePromo($, t, actions, montrerErreur);
 
@@ -417,6 +454,7 @@ function squelette(t, o) {
       <div class="kip-pay__champ">
         <span class="kip-pay__label">${esc(t.coordonnees)}</span>
         <div data-kip="contact"></div>
+        ${o.relance === false ? "" : `<p class="kip-pay__note" style="text-align:left">${esc(t.rappel)}</p>`}
       </div>
 
       <div class="kip-pay__champ">
