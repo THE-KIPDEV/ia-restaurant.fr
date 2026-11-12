@@ -35,6 +35,7 @@
 const TEXTES = {
   payer: "Payer",
   patienter: "Un instant…",
+  chargement: "Chargement du formulaire de paiement sécurisé…",
   encours: "Paiement en cours…",
   recap: "Votre commande",
   sousTotal: "Sous-total",
@@ -74,7 +75,7 @@ const TEXTES = {
  */
 const LANGUES = {
   en: {
-    payer: "Pay", patienter: "One moment…", encours: "Processing…",
+    payer: "Pay", patienter: "One moment…", chargement: "Loading the secure payment form…", encours: "Processing…",
     recap: "Your order", sousTotal: "Subtotal", remise: "Discount", taxe: "Tax",
     total: "Total", parMois: "per month", parAn: "per year",
     codePromo: "I have a promo code", codePromoChamp: "Promo code",
@@ -88,7 +89,7 @@ const LANGUES = {
     rappel: "If the payment does not go through, you will get at most one reminder at this address.",
   },
   pl: {
-    payer: "Zapłać", patienter: "Chwileczkę…", encours: "Przetwarzanie…",
+    payer: "Zapłać", patienter: "Chwileczkę…", chargement: "Ładowanie bezpiecznego formularza płatności…", encours: "Przetwarzanie…",
     recap: "Twoje zamówienie", sousTotal: "Suma częściowa", remise: "Rabat", taxe: "VAT",
     total: "Razem", parMois: "miesięcznie", parAn: "rocznie",
     codePromo: "Mam kod rabatowy", codePromoChamp: "Kod rabatowy",
@@ -102,7 +103,7 @@ const LANGUES = {
     rappel: "Jeśli płatność nie dojdzie do skutku, otrzymasz na ten adres najwyżej jedno przypomnienie.",
   },
   it: {
-    payer: "Paga", patienter: "Un momento…", encours: "Pagamento in corso…",
+    payer: "Paga", patienter: "Un momento…", chargement: "Caricamento del modulo di pagamento sicuro…", encours: "Pagamento in corso…",
     recap: "Il tuo ordine", sousTotal: "Subtotale", remise: "Sconto", taxe: "IVA",
     total: "Totale", parMois: "al mese", parAn: "all'anno",
     codePromo: "Ho un codice sconto", codePromoChamp: "Codice sconto",
@@ -116,7 +117,7 @@ const LANGUES = {
     rappel: "Se il pagamento non va a buon fine, riceverai al massimo un promemoria a questo indirizzo.",
   },
   es: {
-    payer: "Pagar", patienter: "Un momento…", encours: "Procesando…",
+    payer: "Pagar", patienter: "Un momento…", chargement: "Cargando el formulario de pago seguro…", encours: "Procesando…",
     recap: "Tu pedido", sousTotal: "Subtotal", remise: "Descuento", taxe: "IVA",
     total: "Total", parMois: "al mes", parAn: "al año",
     codePromo: "Tengo un código promocional", codePromoChamp: "Código promocional",
@@ -330,8 +331,15 @@ export async function mountKipPay(container, o) {
     });
 
     // Indispensables : sans eux il n'y a pas de paiement possible.
-    monter('[data-kip="contact"]', () => checkout.createContactDetailsElement(), { requis: true });
-    monter('[data-kip="paiement"]', () => checkout.createPaymentElement({ layout: "accordion" }), { requis: true });
+    // 12/11/2026 : les champs Stripe mettent plusieurs secondes à apparaître ; sans repère, le visiteur voyait
+    // « Vos coordonnées / Moyen de paiement » sur un cadre vide (15-25 s mesurées en conteneur 1 CPU) et partait.
+    const quandPret = (zone) => (el) => {
+      const cacher = () => { const a = $(`[data-kip="attente-${zone}"]`); if (a) a.remove(); };
+      try { el.on("ready", cacher); } catch { setTimeout(cacher, 4000); } // jamais bloquant pour le montage
+      setTimeout(cacher, 30000); // filet : jamais de message « chargement » qui reste à vie
+    };
+    monter('[data-kip="contact"]', () => checkout.createContactDetailsElement(), { requis: true, avantMontage: quandPret("contact") });
+    monter('[data-kip="paiement"]', () => checkout.createPaymentElement({ layout: "accordion" }), { requis: true, avantMontage: quandPret("paiement") });
 
     // Agrément : mandats SEPA et conditions des portefeuilles. Réservé par Stripe aux
     // comptes autorisés — absent, le bloc reste simplement vide.
@@ -453,12 +461,14 @@ function squelette(t, o) {
 
       <div class="kip-pay__champ">
         <span class="kip-pay__label">${esc(t.coordonnees)}</span>
+        <p class="kip-pay__attente" data-kip="attente-contact" role="status" style="margin:0;padding:14px 12px;border:1px dashed currentColor;border-radius:8px;opacity:.6;font-size:14px">${esc(t.chargement || t.patienter)}</p>
         <div data-kip="contact"></div>
         ${o.relance === false ? "" : `<p class="kip-pay__note" style="text-align:left">${esc(t.rappel)}</p>`}
       </div>
 
       <div class="kip-pay__champ">
         <span class="kip-pay__label">${esc(t.paiement)}</span>
+        <p class="kip-pay__attente" data-kip="attente-paiement" role="status" style="margin:0;padding:14px 12px;border:1px dashed currentColor;border-radius:8px;opacity:.6;font-size:14px">${esc(t.chargement || t.patienter)}</p>
         <div data-kip="paiement"></div>
       </div>
 
