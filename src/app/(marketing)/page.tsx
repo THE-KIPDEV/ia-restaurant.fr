@@ -46,6 +46,14 @@ export default async function HomePage() {
       <section aria-labelledby="editorial-title" className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <h2 id="editorial-title" className="text-2xl font-bold text-text-primary">À la une</h2>
         <article className="mt-4 card p-6">
+          <p className="text-sm text-text-muted">Guide pratique · 20 novembre 2026</p>
+          <h3 className="mt-2 text-xl font-semibold text-text-primary">
+            <a href="/seo/analyse-marge-restaurant" className="hover:text-neon transition-colors">Marge d’un plat de restaurant : calcul et exemple</a>
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-text-secondary">La formule de marge matière, un exemple chiffré et les limites de cet indicateur pour comparer les plats de votre carte.</p>
+          <a href="/seo/analyse-marge-restaurant" className="mt-4 inline-block text-sm font-medium text-neon underline">Lire le guide</a>
+        </article>
+        <article className="mt-4 card p-6">
           <p className="text-sm text-text-muted">Guide · 26 octobre 2026</p>
           <h3 className="mt-2 text-xl font-semibold text-text-primary">
             <a href="/guides/chantage-avis-google-restaurant" className="hover:text-neon transition-colors">Chantage aux avis Google : préparer le bon signalement</a>
