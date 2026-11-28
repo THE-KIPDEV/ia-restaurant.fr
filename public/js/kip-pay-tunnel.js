@@ -40,6 +40,9 @@
   //    l'ancien chez tout visiteur déjà venu, correctif compris (relevé le 13/09/2026).
   var MODULE = MOI ? MOI.replace(/kip-pay-tunnel\.js(\?.*)?$/, "kip-pay.js$1")
                    : "/js/kip-pay.js";
+  // Le champ e-mail natif exige le module qui sait attendre Stripe.js : ce paramètre évite
+  // d'associer cette colle à une ancienne copie du module restée en cache.
+  MODULE += (MODULE.indexOf("?") < 0 ? "?" : "&") + "kpe=1";
   var stripePret = null;
 
   /** Charge Stripe.js une seule fois, même si l'acheteur rouvre le tunnel. */
@@ -221,11 +224,13 @@
           return chargerStripe(res.publishableKey);
         });
 
-    Promise.all([stripePret, import(o.moduleUrl || MODULE)])
-      .then(function (r) {
-        var stripe = r[0], mod = r[1];
+    // Le formulaire et le champ e-mail s'affichent dès que le module est là, sans attendre
+    // Stripe.js ; si Stripe échoue, mountKipPay rejette et le repli ci-dessous s'applique.
+    stripePret.catch(function () {});
+    import(o.moduleUrl || MODULE)
+      .then(function (mod) {
         return mod.mountKipPay(ui.hote, {
-          stripe: stripe,
+          stripe: stripePret,
           createSession: function () {
             return demanderSession().then(function (res) {
               return { clientSecret: res.clientSecret };

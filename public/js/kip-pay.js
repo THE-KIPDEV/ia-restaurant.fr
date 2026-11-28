@@ -59,6 +59,9 @@ const TEXTES = {
     "Impossible de préparer le paiement. Rechargez la page ; si cela recommence, écrivez-nous.",
   rassurance: "Paiement sécurisé par Stripe. Votre carte n'est jamais vue par ce site.",
   rappel: "Si le paiement n'aboutit pas, vous recevrez au plus un rappel à cette adresse.",
+  emailLibelle: "E-mail",
+  emailExemple: "vous@exemple.fr",
+  emailInvalide: "Vérifiez votre adresse e-mail.",
 };
 
 
@@ -87,6 +90,7 @@ const LANGUES = {
     erreurSession: "The payment could not be prepared. Reload the page; if it happens again, write to us.",
     rassurance: "Payment secured by Stripe. This site never sees your card.",
     rappel: "If the payment does not go through, you will get at most one reminder at this address.",
+    emailLibelle: "Email", emailExemple: "you@example.com", emailInvalide: "Please check your email address.",
   },
   pl: {
     payer: "Zapłać", patienter: "Chwileczkę…", chargement: "Ładowanie bezpiecznego formularza płatności…", encours: "Przetwarzanie…",
@@ -101,6 +105,7 @@ const LANGUES = {
     erreurSession: "Nie udało się przygotować płatności. Odśwież stronę; jeśli to się powtórzy, napisz do nas.",
     rassurance: "Płatność zabezpieczona przez Stripe. Ta strona nigdy nie widzi Twojej karty.",
     rappel: "Jeśli płatność nie dojdzie do skutku, otrzymasz na ten adres najwyżej jedno przypomnienie.",
+    emailLibelle: "E-mail", emailExemple: "ty@przyklad.pl", emailInvalide: "Sprawdź adres e-mail.",
   },
   it: {
     payer: "Paga", patienter: "Un momento…", chargement: "Caricamento del modulo di pagamento sicuro…", encours: "Pagamento in corso…",
@@ -115,6 +120,7 @@ const LANGUES = {
     erreurSession: "Impossibile preparare il pagamento. Ricarica la pagina; se succede ancora, scrivici.",
     rassurance: "Pagamento protetto da Stripe. Questo sito non vede mai la tua carta.",
     rappel: "Se il pagamento non va a buon fine, riceverai al massimo un promemoria a questo indirizzo.",
+    emailLibelle: "E-mail", emailExemple: "tu@esempio.it", emailInvalide: "Controlla il tuo indirizzo e-mail.",
   },
   es: {
     payer: "Pagar", patienter: "Un momento…", chargement: "Cargando el formulario de pago seguro…", encours: "Procesando…",
@@ -129,6 +135,7 @@ const LANGUES = {
     erreurSession: "No se ha podido preparar el pago. Recarga la página; si vuelve a ocurrir, escríbenos.",
     rassurance: "Pago protegido por Stripe. Este sitio nunca ve tu tarjeta.",
     rappel: "Si el pago no se completa, recibirás como máximo un recordatorio en esta dirección.",
+    emailLibelle: "Correo electrónico", emailExemple: "tu@ejemplo.es", emailInvalide: "Comprueba tu correo electrónico.",
   },
 };
 
@@ -157,7 +164,8 @@ const INTERVALLES = { month: "par mois", year: "par an", week: "par semaine", da
 /**
  * @param {HTMLElement} container élément vide qui recevra le tunnel
  * @param {object} o
- * @param {any} o.stripe instance Stripe.js déjà chargée
+ * @param {any} o.stripe instance Stripe.js, ou promesse de cette instance : le formulaire et
+ *   le champ e-mail s'affichent alors sans attendre le chargement de Stripe.js
  * @param {() => Promise<{clientSecret: string}>} o.createSession appelle VOTRE endpoint
  * @param {string} [o.logoUrl] URL du logo du site (SVG de préférence)
  * @param {string} [o.siteName] nom affiché à côté du logo
@@ -209,6 +217,10 @@ export async function mountKipPay(container, o) {
   }
   const bouton = $('[data-kip="bouton"]');
   const zoneErreur = $('[data-kip="erreur"]');
+  const blocNatif = $('[data-kip="email-natif-bloc"]');
+  const champNatif = $('[data-kip="email-natif"]');
+  const erreurNatif = $('[data-kip="email-natif-erreur"]');
+  const zoneContact = $('[data-kip="contact"]');
   const blocExpress = $('[data-kip="bloc-express"]');
 
   const montrerErreur = (m) => {
@@ -221,6 +233,98 @@ export async function mountKipPay(container, o) {
     zoneErreur.hidden = true;
   };
 
+  /**
+   * Le champ e-mail natif (23/11/2026).
+   *
+   * Mesuré dans Chromium sur 3 sites : le champ Stripe apparaît en 2 à 4 s sur une bonne
+   * connexion, mais en 20 à 23 s sur un mobile lent. Ce champ-ci s'affiche tout de suite.
+   * Il est un AGRÉMENT : tout échec rend la main au Contact Element de Stripe, jamais
+   * d'impasse. 🚨 `updateEmail()` lève si la session porte déjà `customer_email` : on ne
+   * l'appelle donc jamais quand `getSession().email` existe au chargement.
+   */
+  let natifActif = !!champNatif;
+  let actionsStripe = null;
+  let emailApplique = "";
+  let filEmail = Promise.resolve();
+  let idSession = null;
+  let adresseNotee = "";
+  let adresseEnAttente = "";
+  let minuteur = null;
+
+  const noterAdresse = (brut) => {
+    const e = typeof brut === "string" ? brut.trim() : "";
+    if (o.relance === false || !e || !ADRESSE_VALIDE.test(e)) return;
+    if (!idSession) { adresseEnAttente = e; return; }
+    if (e === adresseNotee) return;
+    adresseNotee = e;
+    try {
+      // text/plain : pas de pré-vol CORS, keepalive : part même si l'onglet se ferme.
+      fetch(o.recepteurPanier || RECEPTEUR_PANIER, {
+        method: "POST", mode: "cors", keepalive: true, credentials: "omit",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ s: idSession, e, d: location.hostname, l: languePage(o) }),
+      }).catch(() => {});
+    } catch { /* jamais bloquant */ }
+  };
+
+  const montrerContact = () => {
+    natifActif = false;
+    if (blocNatif) blocNatif.hidden = true;
+    if (zoneContact) {
+      zoneContact.removeAttribute("inert");
+      zoneContact.removeAttribute("style");
+    }
+  };
+
+  const appliquerEmail = () => {
+    filEmail = filEmail.then(async () => {
+      if (!natifActif || !actionsStripe || !champNatif) return;
+      const e = champNatif.value.trim();
+      if (!ADRESSE_VALIDE.test(e) || e === emailApplique) return;
+      try {
+        const r = await actionsStripe.updateEmail(e);
+        if (r && r.type === "error") montrerContact();
+        else emailApplique = e;
+      } catch {
+        montrerContact();
+      }
+    }).catch(() => {});
+    return filEmail;
+  };
+
+  if (champNatif) {
+    const dire = (m) => {
+      erreurNatif.textContent = m;
+      erreurNatif.hidden = !m;
+      if (m) champNatif.setAttribute("aria-invalid", "true");
+      else champNatif.removeAttribute("aria-invalid");
+    };
+    const valider = () => {
+      const e = champNatif.value.trim();
+      if (ADRESSE_VALIDE.test(e)) { dire(""); noterAdresse(e); appliquerEmail(); }
+      else if (e) dire(t.emailInvalide);
+    };
+    champNatif.addEventListener("input", () => {
+      dire("");
+      clearTimeout(minuteur);
+      minuteur = setTimeout(() => {
+        const e = champNatif.value.trim();
+        if (ADRESSE_VALIDE.test(e)) { noterAdresse(e); appliquerEmail(); }
+      }, 900);
+    });
+    champNatif.addEventListener("blur", valider);
+    champNatif.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); valider(); }
+    });
+  }
+
+  let stripe;
+  try {
+    stripe = await o.stripe;
+  } catch {
+    return echec(t.erreurCharge);
+  }
+
   // Le SDK accepte une promesse : Stripe initialise son iframe pendant que le serveur
   // crée la session. 🚨 Si elle échoue, `loadActions()` renvoie une erreur au lieu de
   // lever — c'est là qu'on rattrape, pas dans un try/catch autour de createSession.
@@ -231,10 +335,14 @@ export async function mountKipPay(container, o) {
       return r.clientSecret;
     });
   clientSecret.catch(() => {});
+  clientSecret.then((cs) => {
+    idSession = String(cs).split("_secret_")[0];
+    if (adresseEnAttente) noterAdresse(adresseEnAttente);
+  }).catch(() => {});
 
   let checkout;
   try {
-    checkout = o.stripe.initCheckoutElementsSdk({
+    checkout = stripe.initCheckoutElementsSdk({
       clientSecret,
       // 🚨 Sans ça, Stripe propose de payer dans une autre devise en avertissant que
       //    « votre banque peut appliquer des frais de change » — en plein tunnel, sur
@@ -250,6 +358,10 @@ export async function mountKipPay(container, o) {
   const chargement = await checkout.loadActions();
   if (chargement.type !== "success") return echec(t.erreurSession);
   const actions = chargement.actions;
+  actionsStripe = actions;
+  // La session connaît déjà l'acheteur : c'est le Contact Element qui l'affiche.
+  if (natifActif && actions.getSession().email) montrerContact();
+  else if (natifActif) appliquerEmail();
 
   /**
    * Le paiement en un clic (Link, Apple Pay, Google Pay, Amazon Pay).
@@ -333,12 +445,21 @@ export async function mountKipPay(container, o) {
     // Indispensables : sans eux il n'y a pas de paiement possible.
     // 12/11/2026 : les champs Stripe mettent plusieurs secondes à apparaître ; sans repère, le visiteur voyait
     // « Vos coordonnées / Moyen de paiement » sur un cadre vide (15-25 s mesurées en conteneur 1 CPU) et partait.
-    const quandPret = (zone) => (el) => {
-      const cacher = () => { const a = $(`[data-kip="attente-${zone}"]`); if (a) a.remove(); };
+    const quandPret = (zone, apres) => (el) => {
+      const cacher = () => {
+        const a = $(`[data-kip="attente-${zone}"]`);
+        if (a) a.remove();
+        if (apres) apres();
+      };
       try { el.on("ready", cacher); } catch { setTimeout(cacher, 4000); } // jamais bloquant pour le montage
       setTimeout(cacher, 30000); // filet : jamais de message « chargement » qui reste à vie
     };
-    monter('[data-kip="contact"]', () => checkout.createContactDetailsElement(), { requis: true, avantMontage: quandPret("contact") });
+    // Personne n'a commencé à écrire : on rend le champ Stripe (et Link). Sinon on ne retire
+    // jamais un champ sous les doigts du visiteur.
+    const contactPret = quandPret("contact", () => {
+      if (natifActif && champNatif && !champNatif.value.trim() && document.activeElement !== champNatif) montrerContact();
+    });
+    monter('[data-kip="contact"]', () => checkout.createContactDetailsElement(), { requis: true, avantMontage: contactPret });
     monter('[data-kip="paiement"]', () => checkout.createPaymentElement({ layout: "accordion" }), { requis: true, avantMontage: quandPret("paiement") });
 
     // Agrément : mandats SEPA et conditions des portefeuilles. Réservé par Stripe aux
@@ -360,23 +481,7 @@ export async function mountKipPay(container, o) {
   peindre(actions.getSession());
 
   // Voir RECEPTEUR_PANIER. Une seule fois par adresse, sans jamais gêner le paiement.
-  let idSession = null;
-  let adresseNotee = "";
-  clientSecret.then((cs) => { idSession = String(cs).split("_secret_")[0]; }).catch(() => {});
-  const noterAdresse = (s) => {
-    const e = s && typeof s.email === "string" ? s.email.trim() : "";
-    if (o.relance === false || !idSession || !e || e === adresseNotee || !ADRESSE_VALIDE.test(e)) return;
-    adresseNotee = e;
-    try {
-      // text/plain : pas de pré-vol CORS, keepalive : part même si l'onglet se ferme.
-      fetch(o.recepteurPanier || RECEPTEUR_PANIER, {
-        method: "POST", mode: "cors", keepalive: true, credentials: "omit",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ s: idSession, e, d: location.hostname, l: languePage(o) }),
-      }).catch(() => {});
-    } catch { /* jamais bloquant */ }
-  };
-  checkout.on("change", (s) => { peindre(s); noterAdresse(s); });
+  checkout.on("change", (s) => { peindre(s); noterAdresse(s && s.email); });
 
   if (o.codePromo !== false) branchePromo($, t, actions, montrerErreur);
 
@@ -384,12 +489,20 @@ export async function mountKipPay(container, o) {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (enCours) return;
+    if (natifActif && champNatif && !ADRESSE_VALIDE.test(champNatif.value.trim())) {
+      erreurNatif.textContent = t.emailInvalide;
+      erreurNatif.hidden = false;
+      champNatif.setAttribute("aria-invalid", "true");
+      champNatif.focus();
+      return;
+    }
     enCours = true;
     effacerErreur();
     const libelle = bouton.textContent;
     bouton.disabled = true;
     bouton.textContent = t.encours;
 
+    await appliquerEmail();
     const r = await actions.confirm();
 
     // Si la banque impose une authentification, Stripe a déjà redirigé et on n'arrive
@@ -407,6 +520,7 @@ export async function mountKipPay(container, o) {
 
   return {
     destroy() {
+      clearTimeout(minuteur);
       form.removeEventListener("submit", onSubmit);
       elements.forEach((el) => {
         try { el.destroy(); } catch { /* déjà démonté */ }
@@ -419,6 +533,8 @@ export async function mountKipPay(container, o) {
 /* ------------------------------------------------------------------ rendu */
 
 function squelette(t, o) {
+  // Pas de champ natif si l'adresse est déjà connue ou si la relance est coupée.
+  const natif = o.relance !== false && !o.email;
   const entete =
     o.logoUrl || o.siteName
       ? `<header class="kip-pay__marque">
@@ -461,8 +577,15 @@ function squelette(t, o) {
 
       <div class="kip-pay__champ">
         <span class="kip-pay__label">${esc(t.coordonnees)}</span>
-        <p class="kip-pay__attente" data-kip="attente-contact" role="status" style="margin:0;padding:14px 12px;border:1px dashed currentColor;border-radius:8px;opacity:.6;font-size:14px">${esc(t.chargement || t.patienter)}</p>
-        <div data-kip="contact"></div>
+        ${natif ? `<div data-kip="email-natif-bloc">
+          <label for="kip-email-natif" style="display:block;margin:0 0 4px;font-size:14px">${esc(t.emailLibelle)}</label>
+          <input id="kip-email-natif" data-kip="email-natif" type="email" name="email" required
+                 autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false"
+                 placeholder="${esc(t.emailExemple)}"
+                 style="box-sizing:border-box;display:block;width:100%;min-height:44px;padding:10px 12px;font:inherit;font-size:16px;color:inherit;background:#fff;border:1px solid #c9ced6;border-radius:var(--kip-rayon,8px)">
+          <p data-kip="email-natif-erreur" role="alert" hidden style="margin:4px 0 0;font-size:13px;color:#b42318"></p>
+        </div>` : `<p class="kip-pay__attente" data-kip="attente-contact" role="status" style="margin:0;padding:14px 12px;border:1px dashed currentColor;border-radius:8px;opacity:.6;font-size:14px">${esc(t.chargement || t.patienter)}</p>`}
+        <div data-kip="contact"${natif ? ' inert style="height:0;overflow:hidden;opacity:0"' : ""}></div>
         ${o.relance === false ? "" : `<p class="kip-pay__note" style="text-align:left">${esc(t.rappel)}</p>`}
       </div>
 
